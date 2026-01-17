@@ -1,7 +1,3 @@
-local function GetVersionHash()
-    return "a3f7e9d2c8b4f1a6e5d9c2b7f4a1e8d3"
-end
-
 local executor = identifyexecutor() or "Unknown"
 
 if executor == "Xeno" or executor == "Solara" then
@@ -71,7 +67,7 @@ if request and pcall(function() return isexecutorclosure end) and not isexecutor
                         {name = "Executor", value = executor, inline = true}
                     },
                     timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
-                    footer = {text = "Pulse Security System"}
+                    footer = {text = "PSS"}
                 }}
             })
         })
@@ -180,6 +176,7 @@ task.spawn(function()
     end
 end)
 
+
 local function isOwnError(msg: string): boolean
     return msg:match("Remotes") 
         or msg:match("SoftDisPlayer")
@@ -255,7 +252,7 @@ local function forceKick(reason: string)
     while true do end
 end
 
-local function sendWebhook(status: string, reason: string?, versionHash: string?)
+local function sendWebhook(status: string, reason: string?)
     if not settings.EnableErrorWebhook then 
         warn("Webhook disabled in settings")
         return 
@@ -278,10 +275,6 @@ local function sendWebhook(status: string, reason: string?, versionHash: string?
         {name = "Expires", value = os.date("%Y-%m-%d %H:%M:%S", data.expire), inline = true}
     }
     
-    if versionHash then
-        table.insert(fields, {name = "Version", value = "`" .. versionHash .. "`", inline = true})
-    end
-    
     if reason then
         table.insert(fields, 3, {name = "Reason", value = reason, inline = false})
     end
@@ -297,7 +290,7 @@ local function sendWebhook(status: string, reason: string?, versionHash: string?
                 thumbnail = {url = "https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid=" .. plr.UserId .. "&size=150x150&format=Png&isCircular=false"},
                 fields = fields,
                 timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
-                footer = {text = "Pulse Security System"}
+                footer = {text = "PSS"}
             }}
         })
     })
@@ -324,7 +317,7 @@ if blacklist[hwid] then
     
     if isBanned then
         local banMsg = isPermaBan and "Permanent" or ("Expires: " .. os.date("%Y-%m-%d %H:%M:%S", ban.ExpiresAt))
-        sendWebhook("Blacklisted", ban.Reason .. " | " .. banMsg, GetVersionHash())
+        sendWebhook("Blacklisted", ban.Reason .. " | " .. banMsg)
         forceKick("Your HWID is blacklisted.\nReason: " .. ban.Reason .. "\n" .. banMsg)
         return
     end
@@ -333,16 +326,10 @@ end
 if settings.EnableExpire then
     local expireData = http:JSONDecode(game:HttpGet(api))
     if os.time() > expireData.expire then
-        sendWebhook("Expired", "Script key has expired", GetVersionHash())
+        sendWebhook("Expired", "Script key has expired")
         forceKick("Script has expired. Please obtain an updated version.")
-        return
-    end
-    
-    if expireData.version and expireData.version ~= GetVersionHash() then
-        sendWebhook("Version Mismatch", "Outdated version detected", GetVersionHash())
-        forceKick("Script version outdated. Please download the latest version.")
         return
     end
 end
 
-sendWebhook("Authenticated", nil, GetVersionHash())
+sendWebhook("Authenticated")
