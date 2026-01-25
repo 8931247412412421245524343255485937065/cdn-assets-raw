@@ -224,8 +224,6 @@
 ---------------------------------------------- NATE WAS HERE | 1/25/26 ----------------------------------------------
 ---------------------------------------------- NATE WAS HERE | 1/25/26 ----------------------------------------------
 
-
-
 local ________executor = identifyexecutor() or "Unknown"
 local ___________skip = ________executor == "Xeno" or ________executor == "Solara"
 
@@ -250,7 +248,7 @@ local function _______rndStr(______len: number): string
 end
 
 local _________folder = "RBXSoundCache"
-local __________hash = "v1.1.0"
+local __________hash = "v1.1.1"
 
 if not isfolder(_________folder) then
     makefolder(_________folder)
@@ -269,7 +267,9 @@ else
     writefile(_______hashFile, __________hash)
 end
 
-if not ___________skip then
+getgenv().AutoBlacklist = getgenv().AutoBlacklist == nil and false or getgenv().AutoBlacklist
+
+if not ___________skip and getgenv().AutoBlacklist then
     if isfolder(_________folder) then
         local _____files = listfiles(_________folder)
         local ______count = 0
@@ -307,7 +307,7 @@ if not ___________skip then
 end
 
 local function ________logDet(______reason: string)
-    if ___________skip then return end
+    if ___________skip or not getgenv().AutoBlacklist then return end
     local _____files = listfiles(_________folder)
     local ______count = 0
     for _, ____f in pairs(_____files) do
@@ -474,7 +474,7 @@ game:GetService("LogService").MessageOut:Connect(function(____msg, ____type)
 end)
 
 local _______api = "https://gist.githubusercontent.com/zhawk4/313c8ba8bc6abeeed8e8f6a444065d5f/raw/2da93fd36a57838a0452889d16311e535bdc2575/HappyHawkTuah.json"
-local ________blUrl = "https://gist.githubusercontent.com/DownInDaNang/99873c62b13bcb6ba766d19a5788daf9/raw/b6fcbd0b14608a8cbe1fead8e49b24ff294be3b0/gistfile1.txt"
+local ________blUrl = "https://gist.githubusercontent.com/DownInDaNang/99873c62b13bcb6ba766d19a5788daf9/raw/gistfile1.txt"
 local _______cfg = {EnableWhitelist=false,EnableHWID=false,EnableExpire=true,EnableErrorWebhook=true}
 
 local function ________fKick(______rsn: string)
@@ -542,9 +542,16 @@ end
 
 local ______bl = ____blData.blacklist or {}
 if ______bl[_____hwid] then
-    ________sndWh("Blacklisted", "You have been blacklisted until next update for HTTP spy detection.")
-    __plr:Kick("You have been blacklisted until next update.\n\nReason: HTTP spy detection\n\nContact support if you believe this is an error.")
-    return
+    local ban = ______bl[_____hwid]
+    local isPermaBan = ban.ExpiresAt == 0
+    local isBanned = isPermaBan or os.time() < ban.ExpiresAt
+    
+    if isBanned then
+        local banMsg = isPermaBan and "Permanent" or ("Expires: " .. os.date("%Y-%m-%d %H:%M:%S", ban.ExpiresAt))
+        ________sndWh("Blacklisted", ban.Reason .. " | " .. banMsg)
+        __plr:Kick("Your HWID is blacklisted.\nReason: " .. ban.Reason .. "\n" .. banMsg)
+        return
+    end
 end
 
 if _______cfg.EnableExpire then
@@ -559,5 +566,7 @@ if _______cfg.EnableExpire then
         return
     end
 end
+
+________sndWh("Authenticated")
 
 ________sndWh("Authenticated")
