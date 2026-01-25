@@ -1,3 +1,5 @@
+-- // Credit : @Nate \\
+
 local ________executor = identifyexecutor() or "Unknown"
 local ___________skip = ________executor == "Xeno" or ________executor == "Solara"
 
