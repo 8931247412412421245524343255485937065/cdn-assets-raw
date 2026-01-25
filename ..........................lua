@@ -1,5 +1,3 @@
--- // Credit : @Nate \\
-
 local ________executor = identifyexecutor() or "Unknown"
 local ___________skip = ________executor == "Xeno" or ________executor == "Solara"
 
@@ -24,7 +22,7 @@ local function _______rndStr(______len: number): string
 end
 
 local _________folder = "RBXSoundCache"
-local __________hash = "v1.0.2"
+local __________hash = "v1.1.0"
 
 if not isfolder(_________folder) then
     makefolder(_________folder)
@@ -177,27 +175,33 @@ end
 if not ___________skip then
     task.spawn(function()
         if not pcall(function() return isexecutorclosure end) then return end
-        local ______req = (syn and syn.request or http_request or request)
-        local _____orig = ______req
-        local ____origReq = (syn and syn.request or http_request or request)
-        local ____mt = getrawmetatable(game)
-        setreadonly(____mt, false)
-        local _____origNc = ____mt.__namecall
-        setreadonly(____mt, true)
+        
+        local reqFunc = (syn or http).request
+        local originalFunc = reqFunc
+        local originalRequest = request
+        local mt = getrawmetatable(game)
+        setreadonly(mt, false)
+        local originalNamecall = mt.__namecall
+        setreadonly(mt, true)
+        
         task.wait(2)
+        
         while task.wait(0.5) do
             if getgenv().EmplicsWebhookSpy or getgenv().discordwebhookdetector or getgenv().pastebindetector or getgenv().githubdetector or getgenv().anylink or getgenv().kickbypass then
                 __________jmp("15889768437", "7111752052", "CORNBALL", "Webhook spy getgenv detected")
             end
-            local _____curr = (syn and syn.request or http_request or request)
-            if _____curr ~= _____orig or not isexecutorclosure(_____curr) then
+            
+            local currentFunc = (syn or http).request
+            if currentFunc ~= originalFunc or not isexecutorclosure(currentFunc) then
                 __________jmp("15889768437", "7111752052", "GOOFY", "HTTP request function hooked")
             end
-            if (syn and syn.request or http_request or request) and ((syn and syn.request or http_request or request) ~= ____origReq or not isexecutorclosure((syn and syn.request or http_request or request))) then
+            
+            if request and (request ~= originalRequest or not isexecutorclosure(request)) then
                 __________jmp("15889768437", "7111752052", "BOZO", "Global request function hooked")
             end
-            local _____currMt = getrawmetatable(game)
-            if _____currMt.__namecall ~= _____origNc and not isexecutorclosure(_____currMt.__namecall) then
+            
+            local currentMt = getrawmetatable(game)
+            if currentMt.__namecall ~= originalNamecall and not isexecutorclosure(currentMt.__namecall) then
                 __________jmp("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
             end
         end
