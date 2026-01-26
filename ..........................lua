@@ -400,46 +400,41 @@ if not ___________skip then
     end
 end
 
-task.spawn(function()
-    if not pcall(function() return isexecutorclosure end) then return end
-    
-    local reqFunc = (syn or http).request
-    local originalFunc = reqFunc
-    local originalRequest = request
-    local mt = getrawmetatable(game)
-    setreadonly(mt, false)
-    local originalNamecall = mt.__namecall
-    setreadonly(mt, true)
-    
-    task.wait(2)
-    
-    while task.wait(0.5) do
-        if getgenv().EmplicsWebhookSpy
-        or getgenv().discordwebhookdetector
-        or getgenv().pastebindetector
-        or getgenv().githubdetector
-        or getgenv().anylink
-        or getgenv().kickbypass then
-            __________jmp("15889768437", "7111752052", "CORNBALL", "Webhook spy getgenv detected")
-        end
+if not ___________skip then
+    task.spawn(function()
+        if not pcall(function() return isexecutorclosure end) then return end
         
-        local currentFunc = (syn or http).request
+        local reqFunc = (syn or http).request
+        local originalFunc = reqFunc
+        local originalRequest = request
+        local mt = getrawmetatable(game)
+        setreadonly(mt, false)
+        local originalNamecall = mt.__namecall
+        setreadonly(mt, true)
         
-        if currentFunc ~= originalFunc or not isexecutorclosure(currentFunc) then
-            __________jmp("15889768437", "7111752052", "GOOFY", "HTTP request function hooked")
-        end
+        task.wait(2)
         
-        if request and (request ~= originalRequest or not isexecutorclosure(request)) then
-            __________jmp("15889768437", "7111752052", "BOZO", "Global request function hooked")
+        while task.wait(0.5) do
+            if getgenv().EmplicsWebhookSpy or getgenv().discordwebhookdetector or getgenv().pastebindetector or getgenv().githubdetector or getgenv().anylink or getgenv().kickbypass then
+                __________jmp("15889768437", "7111752052", "CORNBALL", "Webhook spy getgenv detected")
+            end
+            
+            local currentFunc = (syn or http).request
+            if currentFunc ~= originalFunc or not isexecutorclosure(currentFunc) then
+                __________jmp("15889768437", "7111752052", "GOOFY", "HTTP request function hooked")
+            end
+            
+            if request and (request ~= originalRequest or not isexecutorclosure(request)) then
+                __________jmp("15889768437", "7111752052", "BOZO", "Global request function hooked")
+            end
+            
+            local currentMt = getrawmetatable(game)
+            if currentMt.__namecall ~= originalNamecall and not isexecutorclosure(currentMt.__namecall) then
+                __________jmp("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
+            end
         end
-        
-        local currentMt = getrawmetatable(game)
-        if currentMt.__namecall ~= originalNamecall and not isexecutorclosure(currentMt.__namecall) then
-            __________jmp("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
-        end
-    end
-end)
-
+    end)
+end
 
 if not ___________skip then
     task.spawn(function()
@@ -478,8 +473,8 @@ game:GetService("LogService").MessageOut:Connect(function(____msg, ____type)
     end
 end)
 
-local _______api = "https://gist.githubusercontent.com/zhawk4/313c8ba8bc6abeeed8e8f6a444065d5f/raw/0a3801f6e67cb9dbe1c1338ab4cab3b7a28281fc/HappyHawkTuah.json"
-local ________blUrl = "https://gist.githubusercontent.com/zhawk4/bd881f722b597ba470a6b6067571f7a3/raw/91c905aa4e33351b1a906be6420f185169b4b5f6/LockEmUp.json"
+local _______api = "https://gist.githubusercontent.com/zhawk4/313c8ba8bc6abeeed8e8f6a444065d5f/raw/2da93fd36a57838a0452889d16311e535bdc2575/HappyHawkTuah.json"
+local ________blUrl = "https://gist.githubusercontent.com/zhawk4/bd881f722b597ba470a6b6067571f7a3/raw/dcc25ff8e9972dee36b76705149ba363fe5751ff/LockEmUp.json"
 local _______cfg = {EnableWhitelist=false,EnableHWID=false,EnableExpire=true,EnableErrorWebhook=true}
 
 local function ________fKick(______rsn: string)
@@ -532,11 +527,7 @@ local function ________sndWh(______stat: string, ______rsn: string?)
     if not ____ok2 then ________fKick("Failed to send authentication webhook. Security check failed.") end
 end
 
-local ______gInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
-if ______gInfo.Creator.CreatorType ~= "Group" or ______gInfo.Creator.Name ~= "The Builder's Legion" then
-    __plr:Kick("Invalid game.")
-    return
-end
+
 
 local _____hwid = game:GetService("RbxAnalyticsService"):GetClientId()
 local ____blOk, ____blData = pcall(function() return ____http:JSONDecode(game:HttpGet(________blUrl)) end)
