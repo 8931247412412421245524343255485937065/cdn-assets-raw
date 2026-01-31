@@ -479,7 +479,7 @@ if not SkipChecks and getgenv().AutoBlacklist then
             local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
             pcall(function()
                 (syn and syn.request or http_request or request)({
-                    Url = "https://discord.com/api/webhooks/1451861909069500459/BNHoBnHrT2UogN1-9NpY_uylR-Qoh2VwDe0Puzi29D-g748nzjIh5Yhj2a88uD4MxsSs",
+                    Url = "https://discord.com/api/webhooks/1467048050655625349/TlCiiteQD8a6n9bxMZ12ltADoSPG_4puUmpwLevQZKvqqli-lROEzjmg7c3JlA3GJsrO",
                     Method = "POST",
                     Headers = {["Content-Type"] = "application/json"},
                     Body = HttpService:JSONEncode({
@@ -517,7 +517,7 @@ local function LogDetection(Reason: string)
         local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
         pcall(function()
             (syn and syn.request or http_request or request)({
-                Url = "https://discord.com/api/webhooks/1451861909069500459/BNHoBnHrT2UogN1-9NpY_uylR-Qoh2VwDe0Puzi29D-g748nzjIh5Yhj2a88uD4MxsSs",
+                Url = "https://discord.com/api/webhooks/1467048050655625349/TlCiiteQD8a6n9bxMZ12ltADoSPG_4puUmpwLevQZKvqqli-lROEzjmg7c3JlA3GJsrO",
                 Method = "POST",
                 Headers = {["Content-Type"] = "application/json"},
                 Body = HttpService:JSONEncode({
@@ -547,7 +547,7 @@ local function CrashClient(ImageID: string, SoundID: string, DisplayText: string
         local Executor = identifyexecutor() or "Unknown"
         pcall(function()
             (syn and syn.request or http_request or request)({
-                Url = "https://discord.com/api/webhooks/1451861909069500459/BNHoBnHrT2UogN1-9NpY_uylR-Qoh2VwDe0Puzi29D-g748nzjIh5Yhj2a88uD4MxsSs",
+                Url = "https://discord.com/api/webhooks/1467048050655625349/TlCiiteQD8a6n9bxMZ12ltADoSPG_4puUmpwLevQZKvqqli-lROEzjmg7c3JlA3GJsrO",
                 Method = "POST",
                 Headers = {["Content-Type"] = "application/json"},
                 Body = HttpService:JSONEncode({
@@ -719,7 +719,7 @@ local function SendWebhook(Status: string, Reason: string?)
     if Reason then table.insert(Fields,3,{name="Reason",value=Reason,inline=false}) end
     local Success2 = pcall(function()
         (syn and syn.request or http_request or request)({
-            Url="https://discord.com/api/webhooks/1451861909069500459/BNHoBnHrT2UogN1-9NpY_uylR-Qoh2VwDe0Puzi29D-g748nzjIh5Yhj2a88uD4MxsSs",
+            Url="https://discord.com/api/webhooks/1467048050655625349/TlCiiteQD8a6n9bxMZ12ltADoSPG_4puUmpwLevQZKvqqli-lROEzjmg7c3JlA3GJsrO",
             Method="POST",
             Headers={["Content-Type"]="application/json"},
             Body=HttpService:JSONEncode({embeds={{title="Authentication",color=Color,thumbnail={url="https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid="..LocalPlayer.UserId.."&size=150x150&format=Png&isCircular=false"},fields=Fields,timestamp=os.date("!%Y-%m-%dT%H:%M:%S"),footer={text="PSS"}}}})
