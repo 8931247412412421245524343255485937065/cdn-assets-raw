@@ -251,7 +251,6 @@ until RanTimes >= 2
 Connection:Disconnect()
 
 local RealEnv = getfenv()
-local ProtectedFuncs = {}
 
 local SavedFunctions = {
     getfenv = getfenv,
@@ -267,13 +266,6 @@ local SavedFunctions = {
     pcall = pcall,
     tostring = tostring
 }
-
-local legitimateFunctions = {}
-for _, func in pairs(originalGetgc()) do
-    if type(func) == "function" and islclosure(func) then
-        legitimateFunctions[func] = true
-    end
-end
 
 local function GenerateTrapKey()
     local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
@@ -431,16 +423,9 @@ next = function(t, k)
     return OriginalNext(t, k)
 end
 
-local function isLegitimateCall()
-    local caller = SavedFunctions.getfenv(2)
-    if caller == RealEnv then return true end
-    
-    local callerFunc = debug.getinfo(2, "f").func
-    return legitimateFunctions[callerFunc] == true
-end
-
 getgc = function(includeTables)
-    if not isLegitimateCall() then
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
         CorruptAndCrash()
     end
     return originalGetgc(includeTables)
@@ -448,7 +433,8 @@ end
 
 debug = setmetatable({}, {
     __index = function(self, key)
-        if not isLegitimateCall() then
+        local caller = SavedFunctions.getfenv(2)
+        if caller ~= RealEnv then
             CorruptAndCrash()
         end
         return originalDebug[key]
@@ -457,28 +443,32 @@ debug = setmetatable({}, {
 })
 
 getreg = function()
-    if not isLegitimateCall() then
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
         CorruptAndCrash()
     end
     return originalGetreg()
 end
 
 getscripts = function()
-    if not isLegitimateCall() then
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
         CorruptAndCrash()
     end
     return originalGetscripts()
 end
 
 getscriptclosure = function(script)
-    if not isLegitimateCall() then
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
         CorruptAndCrash()
     end
     return originalGetscriptclosure(script)
 end
 
 getnilinstances = function()
-    if not isLegitimateCall() then
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
         CorruptAndCrash()
     end
     return originalGetnilinstances()
@@ -550,7 +540,7 @@ local function GenerateRandomString(Length: number): string
 end
 
 local CacheFolder = "RBXSoundCache"
-local ScriptHash = "v1.1.7"
+local ScriptHash = "v1.1.8"
 
 if not isfolder(CacheFolder) then
     makefolder(CacheFolder)
