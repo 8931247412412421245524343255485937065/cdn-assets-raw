@@ -238,6 +238,13 @@ local originalGetreg = getreg
 local originalGetscripts = getscripts
 local originalGetscriptclosure = getscriptclosure
 local originalGetnilinstances = getnilinstances
+local originalWritefile = writefile
+local originalReadfile = readfile
+local originalListfiles = listfiles
+local originalDelfile = delfile
+local originalMakefolder = makefolder
+local originalIsfolder = isfolder
+local originalIsfile = isfile
 
 local RanTimes = 0
 local Connection = game:GetService("RunService").Heartbeat:Connect(function()
@@ -427,7 +434,7 @@ end
 getgc = function(includeTables)
     local caller = SavedFunctions.getfenv(2)
     if caller ~= RealEnv then
-        CorruptAndCrash()
+        error("This function has been disabled for security purposes.")
     end
     return {}
 end
@@ -436,17 +443,17 @@ debug = setmetatable({}, {
     __index = function(self, key)
         local caller = SavedFunctions.getfenv(2)
         if caller ~= RealEnv then
-            CorruptAndCrash()
+            error("This function has been disabled for security purposes.")
         end
         return function() return {} end
     end,
-    __newindex = function() CorruptAndCrash() end
+    __newindex = function() error("This function has been disabled for security purposes.") end
 })
 
 getreg = function()
     local caller = SavedFunctions.getfenv(2)
     if caller ~= RealEnv then
-        CorruptAndCrash()
+        error("This function has been disabled for security purposes.")
     end
     return {}
 end
@@ -454,7 +461,7 @@ end
 getscripts = function()
     local caller = SavedFunctions.getfenv(2)
     if caller ~= RealEnv then
-        CorruptAndCrash()
+        error("This function has been disabled for security purposes.")
     end
     return {}
 end
@@ -462,7 +469,7 @@ end
 getscriptclosure = function(script)
     local caller = SavedFunctions.getfenv(2)
     if caller ~= RealEnv then
-        CorruptAndCrash()
+        error("This function has been disabled for security purposes.")
     end
     return function() end
 end
@@ -470,9 +477,65 @@ end
 getnilinstances = function()
     local caller = SavedFunctions.getfenv(2)
     if caller ~= RealEnv then
-        CorruptAndCrash()
+        error("This function has been disabled for security purposes.")
     end
     return {}
+end
+
+writefile = function(filename, content)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        error("File operations have been disabled for security purposes.")
+    end
+    return originalWritefile(filename, content)
+end
+
+readfile = function(filename)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        error("File operations have been disabled for security purposes.")
+    end
+    return originalReadfile(filename)
+end
+
+listfiles = function(folder)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        error("File operations have been disabled for security purposes.")
+    end
+    return originalListfiles(folder)
+end
+
+delfile = function(filename)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        error("File operations have been disabled for security purposes.")
+    end
+    return originalDelfile(filename)
+end
+
+makefolder = function(foldername)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        error("File operations have been disabled for security purposes.")
+    end
+    return originalMakefolder(foldername)
+end
+
+isfolder = function(foldername)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        error("File operations have been disabled for security purposes.")
+    end
+    return originalIsfolder(foldername)
+end
+
+isfile = function(filename)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        error("File operations have been disabled for security purposes.")
+    end
+    return originalIsfile(filename)
 end
 
 local ScriptFingerprint = {}
@@ -543,28 +606,28 @@ end
 local CacheFolder = "RBXSoundCache"
 local ScriptHash = "v1.1.8"
 
-if not isfolder(CacheFolder) then
-    makefolder(CacheFolder)
+if not originalIsfolder(CacheFolder) then
+    originalMakefolder(CacheFolder)
 end
 
 local HashFile = CacheFolder .. "/.hash"
-if isfile(HashFile) then
-    local StoredHash = readfile(HashFile)
+if originalIsfile(HashFile) then
+    local StoredHash = originalReadfile(HashFile)
     if StoredHash ~= ScriptHash then
-        for _, File in pairs(listfiles(CacheFolder)) do
-            delfile(File)
+        for _, File in pairs(originalListfiles(CacheFolder)) do
+            originalDelfile(File)
         end
-        writefile(HashFile, ScriptHash)
+        originalWritefile(HashFile, ScriptHash)
     end
 else
-    writefile(HashFile, ScriptHash)
+    originalWritefile(HashFile, ScriptHash)
 end
 
 getgenv().AutoBlacklist = getgenv().AutoBlacklist == nil and false or getgenv().AutoBlacklist
 
 if not SkipChecks and getgenv().AutoBlacklist then
-    if isfolder(CacheFolder) then
-        local Files = listfiles(CacheFolder)
+    if originalIsfolder(CacheFolder) then
+        local Files = originalListfiles(CacheFolder)
         local DetectionCount = 0
         for _, File in pairs(Files) do
             if not File:match("%.hash$") then
@@ -601,14 +664,14 @@ end
 
 local function LogDetection(Reason: string)
     if SkipChecks or not getgenv().AutoBlacklist then return end
-    local Files = listfiles(CacheFolder)
+    local Files = originalListfiles(CacheFolder)
     local DetectionCount = 0
     for _, File in pairs(Files) do
         if not File:match("%.hash$") then
             DetectionCount = DetectionCount + 1
         end
     end
-    writefile(CacheFolder .. "/." .. GenerateRandomString(24) .. ".tmp", Reason .. " | " .. os.date("%Y-%m-%d %H:%M:%S"))
+    originalWritefile(CacheFolder .. "/." .. GenerateRandomString(24) .. ".tmp", Reason .. " | " .. os.date("%Y-%m-%d %H:%M:%S"))
     if DetectionCount + 1 >= 5 then
         local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
         pcall(function()
@@ -753,7 +816,7 @@ local function IsOwnMessage(Message: string): boolean
         or Message:match("GetMode") or Message:match("GetBallSpeed") or Message:match("IsBallShot")
         or Message:match("GetBallCreator") or Message:match("IsPlayerMyTeammate") or Message:match("IsThreatening")
         or Message:match("UpdateCharacter") or Message:match("VirtualInputManager") or Message:match("cloneref")
-        or Message:match("ENVLOGGER")
+        or Message:match("ENVLOGGER") or Message:match("security purposes")
 end
 
 game:GetService("LogService").MessageOut:Connect(function(Message, MessageType)
@@ -766,6 +829,9 @@ game:GetService("LogService").MessageOut:Connect(function(Message, MessageType)
     end
     if Message:match("strings") or Message:match("Saved") or Message:match("dumper") or Message:match("constants") or Message:match("upvalues") then
         CrashClient("15889768437", "7111752052", "STRING DUMPER", "String dumper activity detected: " .. Message:sub(1, 100))
+    end
+    if Message:match("security purposes") then
+        CrashClient("15889768437", "7111752052", "BLOCKED FUNCTION", "Attempted to use blocked function: " .. Message:sub(1, 100))
     end
     if IsOwnMessage(Message) then return end
     if Message:match("discord%.com/api/webhooks") or Message:match("webhook") or (MessageType == Enum.MessageType.MessageError and (Message:match("HttpPost") or Message:match("HttpGet") or Message:match("HTTP"))) then
@@ -834,7 +900,6 @@ if not BlacklistSuccess then
     ForceKick("Failed to fetch blacklist data. Please try again later.")
     return
 end
-
 
 local Blacklist = BlacklistData.blacklist or {}
 if Blacklist[HWID] then
