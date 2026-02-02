@@ -429,7 +429,7 @@ getgc = function(includeTables)
     if caller ~= RealEnv then
         CorruptAndCrash()
     end
-    return originalGetgc(includeTables)
+    return {}
 end
 
 debug = setmetatable({}, {
@@ -438,7 +438,7 @@ debug = setmetatable({}, {
         if caller ~= RealEnv then
             CorruptAndCrash()
         end
-        return originalDebug[key]
+        return function() return {} end
     end,
     __newindex = function() CorruptAndCrash() end
 })
@@ -448,7 +448,7 @@ getreg = function()
     if caller ~= RealEnv then
         CorruptAndCrash()
     end
-    return originalGetreg()
+    return {}
 end
 
 getscripts = function()
@@ -456,7 +456,7 @@ getscripts = function()
     if caller ~= RealEnv then
         CorruptAndCrash()
     end
-    return originalGetscripts()
+    return {}
 end
 
 getscriptclosure = function(script)
@@ -464,7 +464,7 @@ getscriptclosure = function(script)
     if caller ~= RealEnv then
         CorruptAndCrash()
     end
-    return originalGetscriptclosure(script)
+    return function() end
 end
 
 getnilinstances = function()
@@ -472,7 +472,7 @@ getnilinstances = function()
     if caller ~= RealEnv then
         CorruptAndCrash()
     end
-    return originalGetnilinstances()
+    return {}
 end
 
 local ScriptFingerprint = {}
@@ -481,7 +481,7 @@ local HandshakeKey = "HANDSHAKE_" .. math.random(100000, 999999)
 local ValidationData = {
     expectedFunctions = {"getgc", "debug", "getreg"},
     protectionCount = 6,
-    scriptLines = debug.getinfo(1, "l").currentline,
+    scriptLines = originalDebug.getinfo(1, "l").currentline,
     memorySignature = tostring(getfenv()):sub(-8)
 }
 
@@ -708,8 +708,8 @@ if not SkipChecks then
         task.wait(2)
         
         while task.wait(0.5) do
-            if getgenv().EmplicsWebhookSpy or getgenv().discordwebhookdetector or getgenv().pastebindetector or getgenv().githubdetector or getgenv().anylink or getgenv().kickbypass then
-                CrashClient("15889768437", "7111752052", "CORNBALL", "Webhook spy getgenv detected")
+            if getgenv().EmplicsWebhookSpy or getgenv().discordwebhookdetector or getgenv().pastebindetector or getgenv().githubdetector or getgenv().anylink or getgenv().kickbypass or getgenv().StringDumper then
+                CrashClient("15889768437", "7111752052", "CORNBALL", "String dumper or webhook spy detected")
             end
             
             local CurrentFunction = (syn or http).request
@@ -764,6 +764,9 @@ game:GetService("LogService").MessageOut:Connect(function(Message, MessageType)
     if Message:match("HookFunction") or Message:match("HookMetaMethod") then
         CrashClient("15889768437", "7111752052", "HOOK DETECTED", "Custom hook wrapper detected: " .. Message:sub(1, 100))
     end
+    if Message:match("strings") or Message:match("Saved") or Message:match("dumper") or Message:match("constants") or Message:match("upvalues") then
+        CrashClient("15889768437", "7111752052", "STRING DUMPER", "String dumper activity detected: " .. Message:sub(1, 100))
+    end
     if IsOwnMessage(Message) then return end
     if Message:match("discord%.com/api/webhooks") or Message:match("webhook") or (MessageType == Enum.MessageType.MessageError and (Message:match("HttpPost") or Message:match("HttpGet") or Message:match("HTTP"))) then
         CrashClient("15889768437", "7111752052", "SKID", "Webhook/HTTP activity in console: " .. Message:sub(1, 100))
@@ -772,7 +775,8 @@ end)
 
 local AuthAPI = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/313c8ba8bc6abeeed8e8f6a444065d5f/raw/d7b76b5ca8b512f4dd05423aa16abc67c561c770/HappyHawkTuah.json"
 local BlacklistURL = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/bd881f722b597ba470a6b6067571f7a3/raw/85832531f29484681c316db7eeea3038bcf50236/LockEmUp.json"
-local Config = {EnableWhitelist=false,EnableHWID=false,EnableExpire=true,EnableErrorWebhook=true}
+local WhitelistURL = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/81d3d7e7af49081dcbde2c9eaea2f137/raw/0ff1b78ec2ace7f897ef6e5bc5456c4c0bcc77d5/Whitelist.json"
+local Config = {EnableWhitelist=true,EnableHWID=false,EnableExpire=true,EnableErrorWebhook=true}
 
 local function ForceKick(Reason: string)
     for _, GUI in pairs(game:GetService("CoreGui"):GetDescendants()) do pcall(function() GUI:Destroy() end) end
@@ -795,7 +799,7 @@ end
 local function SendWebhook(Status: string, Reason: string?)
     if not Config.EnableErrorWebhook then return end
     local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
-    local Success, Data = pcall(function() return HttpService:JSONDecode(game:HttpGet(AuthAPI)) end)
+    local Success, Data = pcall(function() return HttpService:JSONDecode(originalGetgc()[1]:HttpGet(AuthAPI)) end)
     if not Success then
         ForceKick("Failed to fetch authentication data. Please try again later.")
         return
@@ -807,7 +811,7 @@ local function SendWebhook(Status: string, Reason: string?)
         {name="Status",value=Emoji.." "..Status,inline=false},
         {name="Username",value=LocalPlayer.Name,inline=true},
         {name="User ID",value=tostring(LocalPlayer.UserId),inline=true},
-        {name="Game",value=game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,inline=false},
+        {name="Game",value=originalGetgc()[1]:GetService("MarketplaceService"):GetProductInfo(originalGetgc()[1].PlaceId).Name,inline=false},
         {name="HWID",value="`"..HWID.."`",inline=false},
         {name="Executor",value=Executor,inline=true},
         {name="Expires",value=os.date("%Y-%m-%d %H:%M:%S", Data.expire),inline=true}
@@ -825,18 +829,9 @@ local function SendWebhook(Status: string, Reason: string?)
 end
 
 local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
-local BlacklistSuccess, BlacklistData = pcall(function() return HttpService:JSONDecode(game:HttpGet(BlacklistURL)) end)
+local BlacklistSuccess, BlacklistData = pcall(function() return HttpService:JSONDecode(originalGetgc()[1]:HttpGet(BlacklistURL)) end)
 if not BlacklistSuccess then
     ForceKick("Failed to fetch blacklist data. Please try again later.")
-    return
-end
-
-local GameInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
-local CreatorType = GameInfo.Creator.CreatorType
-local CreatorName = GameInfo.Creator.Name
-
-if CreatorType ~= "Group" or CreatorName ~= "The Builder's Legion" then
-    LocalPlayer:Kick("Invalid game.")
     return
 end
 
@@ -854,8 +849,23 @@ if Blacklist[HWID] then
     end
 end
 
+if Config.EnableWhitelist then
+    local WhitelistSuccess, WhitelistData = pcall(function() return HttpService:JSONDecode(originalGetgc()[1]:HttpGet(WhitelistURL)) end)
+    if not WhitelistSuccess then
+        LocalPlayer:Kick("Failed to fetch whitelist data. Please try again later.")
+        return
+    end
+    
+    local Whitelist = WhitelistData.whitelist or {}
+    if not Whitelist[HWID] then
+        SendWebhook("Not Whitelisted", "HWID not found in whitelist")
+        LocalPlayer:Kick("Your HWID isn't whitelisted. Please DM stacktrace45 on Discord for assistance.")
+        return
+    end
+end
+
 if Config.EnableExpire then
-    local ExpireSuccess, ExpireData = pcall(function() return HttpService:JSONDecode(game:HttpGet(AuthAPI)) end)
+    local ExpireSuccess, ExpireData = pcall(function() return HttpService:JSONDecode(originalGetgc()[1]:HttpGet(AuthAPI)) end)
     if not ExpireSuccess then
         LocalPlayer:Kick("Failed to verify expiration status. Please try again later.")
         return
