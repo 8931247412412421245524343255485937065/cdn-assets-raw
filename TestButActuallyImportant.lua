@@ -1,4 +1,4 @@
--- Anti-tamper I wrote myself. If you are viewing this (which you aren’t supposed to), help yourself and skid this. Maybe shoot me a DM on Discord @stacktrace45 telling me how you bypassed it. Detects hooking, spoofing, and other bypass attempts.
+-- Anti-tamper I wrote. If you are viewing this (which you aren’t supposed to), help yourself and skid this. Maybe shoot me a DM on Discord @stacktrace45 telling me how you bypassed it. Detects hooking, spoofing, and other bypass attempts.
 
 -- get exec name
 local ExecutorName = identifyexecutor() or "Unknown"
