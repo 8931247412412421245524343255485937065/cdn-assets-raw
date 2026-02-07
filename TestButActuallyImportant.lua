@@ -45,6 +45,14 @@ hookfunction(writefile, function(FP, FD)
     return originalWritefile(FP, FD)
 end)
 
+local OrigRestore = clonefunction(restorefunction)
+
+hookfunction(restorefunction, function(func)
+    if func == writefile then
+        error("This function has been protected and cannot be restored for security reasons.")
+    end
+    return OrigRestore(func)
+end)
 
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local HttpService = game:GetService("HttpService")
