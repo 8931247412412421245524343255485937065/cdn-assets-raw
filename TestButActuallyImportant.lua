@@ -19,7 +19,7 @@ local originalMakefolder = makefolder
 local originalIsfolder = isfolder
 local originalIsfile = isfile
 local originalLoadstring = loadstring
-local OrigRestore = restorefunction
+local OrigRestore = clonefunction(restorefunction)
 
 
 local BS = {
@@ -36,6 +36,13 @@ local BS = {
     ["password"] = "get help",
     ["hwid"] = "sad honestly"
 }
+hookfunction(restorefunction, function(func)
+    if func == writefile then
+        error("This function has been protected and cannot be restored for security reasons.")
+    end
+    return OrigRestore(func)
+end)
+
 
 hookfunction(writefile, function(FP, FD)
     for B, M in pairs(BS) do
@@ -45,13 +52,6 @@ hookfunction(writefile, function(FP, FD)
     end
     
     return originalWritefile(FP, FD)
-end)
-
-hookfunction(restorefunction, function(func)
-    if func == writefile then
-        error("This function has been protected and cannot be restored for security reasons.")
-    end
-    return OrigRestore(func)
 end)
 
 local LocalPlayer = game:GetService("Players").LocalPlayer
