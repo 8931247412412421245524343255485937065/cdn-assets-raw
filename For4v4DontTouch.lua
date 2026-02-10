@@ -774,35 +774,33 @@ if not SkipChecks then
 
     -- start monitoring for HTTP hooks and other tampering
     task.spawn(function()
-        if not pcall(function() return isexecutorclosure end) then return end
-        
-        local RequestFunction = (syn or http).request
-        local OriginalFunction = RequestFunction
-        local OriginalRequest = request
-        local Metatable = getrawmetatable(game)
-        setreadonly(Metatable, false)
-        local OriginalNamecall = Metatable.__namecall
-        setreadonly(Metatable, true)
-
-        local OriginalNamecall = Metatable.__namecall
-setreadonly(Metatable, true)
-
-local o
-o = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-    local m = getnamecallmethod()
-    if self == game and m == "HttpGet" then
-        local u = (...)
-        if u:match("github.com/dawid%-scripts/Fluent/releases/latest/download/main.lua")
-        or u:match("raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/SaveManager.lua")
-        or u:match("raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/InterfaceManager.lua") then
-            return o(self, ...)
-        end
-        error("Loadstrings are disabled by Pulse for security reasons.")
-    end
+    if not pcall(function() return isexecutorclosure end) then return end
+    
+    local RequestFunction = (syn or http).request
+    local OriginalFunction = RequestFunction
+    local OriginalRequest = request
+    local Metatable = getrawmetatable(game)
+    setreadonly(Metatable, false)
+    
+    local o
+    o = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+        local m = getnamecallmethod()
+        if self == game and m == "HttpGet" then
+            local u = (...)
+            if u:match("github.com/dawid%-scripts/Fluent/releases/latest/download/main.lua")
+or u:match("raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/SaveManager.lua")
+or u:match("raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/InterfaceManager.lua")
+or u:match("gist.githubusercontent.com/8931247412412421245524343255485937065") then
     return o(self, ...)
-end))
+end
 
-
+            error("Loadstrings are disabled by Pulse for security reasons.")
+        end
+        return o(self, ...)
+    end))
+    
+    local OriginalNamecall = Metatable.__namecall
+    setreadonly(Metatable, true)
 
 
             
