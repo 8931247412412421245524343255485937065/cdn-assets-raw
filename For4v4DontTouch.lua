@@ -710,25 +710,21 @@ if not SkipChecks then
         CorruptAndCrash()
     end
     -- only allow loadstring for my specific script :)
-local originalHttpGet = game.HttpGet
-hookmetamethod(game, "__index", function(self, key)
-    if key == "HttpGet" and self == game then
-        return function(_, url, ...)
-            if url:match("https://github.com/dawid%-scripts/Fluent/releases/latest/download/main.lua") or
-               url:match("https://raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/SaveManager.lua") or
-               url:match("https://raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/InterfaceManager.lua") or
-               url:match("https://raw.githubusercontent.com/DownInDaNang/Roblox/refs/heads/main/RSS/Hanak.lua") then
-                return originalHttpGet(game, url, ...)
-            end
-            error("HTTP requests disabled by Pulse for security reasons.")
+    local o
+    o = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+    local m = getnamecallmethod()
+    if self == game and m == "HttpGet" then
+        local u = (...)
+        if u:match("github.com/dawid%-scripts/Fluent/releases/latest/download/main.lua")
+        or u:match("raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/SaveManager.lua")
+        or u:match("raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/InterfaceManager.lua") then
+            return o(self, ...)
         end
+        error("Loadstrings are disabled by Pulse for security reasons.")
     end
-    return originalIndex(self, key)
-end)
+    return o(self, ...)
+end))
 
-loadstring = function(source, chunkname)
-    return originalLoadstring(source, chunkname)
-end
 
     -- integrity verification (this was poorly put together)
     local ScriptFingerprint = {}
