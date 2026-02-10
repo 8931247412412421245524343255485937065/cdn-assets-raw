@@ -436,13 +436,15 @@ end)
 
 
     -- monitor if they try to restore blocked functions
-    task.spawn(function()
-        while task.wait(1) do
-            if setclipboard ~= blockedSetclipboard or writefile ~= blockedWritefile then
-                CrashClient("", "", "", "Attempted to restore blocked functions")
-            end
+task.spawn(function()
+    task.wait(5) -- Wait same time as blocking
+    while task.wait(1) do
+        if setclipboard ~= blockedSetclipboard or writefile ~= blockedWritefile then
+            CrashClient("", "", "", "Attempted to restore blocked functions")
         end
-    end)
+    end
+end)
+
     
     -- setup cache folder
     if not originalIsfolder(CacheFolder) then
