@@ -711,11 +711,15 @@ if not SkipChecks then
     end
     -- only allow loadstring for my specific script :)
     loadstring = function(source, chunkname)
-        if source and source:match("https://raw.githubusercontent.com/DownInDaNang/Roblox/refs/heads/main/RSS/Hanak.lua") then
-            return originalLoadstring(source, chunkname)
-        end
-        error("Loadstring has been disabled by Pulse for security reasons.")
+    if source and (source:match("https://raw.githubusercontent.com/DownInDaNang/Roblox/refs/heads/main/RSS/Hanak.lua") or
+                   source:match("https://github.com/dawid%-scripts/Fluent/releases/latest/download/main.lua") or
+                   source:match("https://raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/SaveManager.lua") or
+                   source:match("https://raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/InterfaceManager.lua")) then
+        return originalLoadstring(source, chunkname)
     end
+    error("Loadstring has been disabled by Pulse for security reasons.")
+end
+
     -- integrity verification (this was poorly put together)
     local ScriptFingerprint = {}
     local HandshakeKey = "HANDSHAKE_" .. math.random(100000, 999999)
