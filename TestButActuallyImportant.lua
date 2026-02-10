@@ -37,16 +37,6 @@ local BS = {
     ["hwid"] = "sad honestly"
 }
 
-hookfunction(writefile, function(FP, FD)
-    for B, M in pairs(BS) do
-        if FP:lower():find(B:lower()) then
-            return originalWritefile(FP, M)
-        end
-    end
-    
-    return originalWritefile(FP, FD)
-end)
-
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local HttpService = game:GetService("HttpService")
 
