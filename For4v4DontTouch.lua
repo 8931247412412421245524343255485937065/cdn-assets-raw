@@ -409,27 +409,30 @@ if not SkipChecks then
 local blockedSetclipboard = createSecureBlock("setclipboard")
 local blockedWritefile = createSecureBlock("writefile")
 
--- Store original functions for monitoring
-local originalSetclipboard = setclipboard
-local originalWritefile = writefile
-
 task.spawn(function()
     task.wait(5)
     setclipboard = blockedSetclipboard
-    writefile = blockedWritefile
     toclipboard = createSecureBlock("toclipboard")
     toClipboard = createSecureBlock("toClipboard")
     setClipboard = createSecureBlock("setClipboard")
     writeclipboard = createSecureBlock("writeclipboard")
     writeClipboard = createSecureBlock("writeClipboard")
-    
-    readfile = createSecureBlock("readfile")
-    listfiles = createSecureBlock("listfiles")
-    delfile = createSecureBlock("delfile")
-    makefolder = createSecureBlock("makefolder")
-    isfolder = createSecureBlock("isfolder")
-    isfile = createSecureBlock("isfile")
 end)
+
+for k, v in pairs(getgenv()) do
+    if type(k) == "string" and k:lower():match("clipboard") then
+        getgenv()[k] = createSecureBlock(k)
+    end
+end
+
+-- block file functions (no delay)
+writefile = blockedWritefile
+readfile = createSecureBlock("readfile")
+listfiles = createSecureBlock("listfiles")
+delfile = createSecureBlock("delfile")
+makefolder = createSecureBlock("makefolder")
+isfolder = createSecureBlock("isfolder")
+isfile = createSecureBlock("isfile")
 
 for k, v in pairs(getgenv()) do
     if type(k) == "string" and k:lower():match("clipboard") then
