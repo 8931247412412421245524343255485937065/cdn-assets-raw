@@ -411,7 +411,7 @@ local blockedSetclipboard = createSecureBlock("setclipboard")
 local blockedWritefile = createSecureBlock("writefile")
 
 task.spawn(function()
-    task.wait(5)
+    task.wait205)
     setclipboard = blockedSetclipboard
     toclipboard = createSecureBlock("toclipboard")
     toClipboard = createSecureBlock("toClipboard")
