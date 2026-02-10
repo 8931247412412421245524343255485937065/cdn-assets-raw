@@ -406,6 +406,7 @@ if not SkipChecks then
         end
     end
     -- block all clip funcs for security purposes. This isen't needed but, in my case I will just use just because.
+    -- block all clip funcs for security purposes. This isen't needed but, in my case I will just use just because.
 local blockedSetclipboard = createSecureBlock("setclipboard")
 local blockedWritefile = createSecureBlock("writefile")
 
@@ -425,20 +426,18 @@ for k, v in pairs(getgenv()) do
     end
 end
 
--- block file functions (no delay)
-writefile = blockedWritefile
-readfile = createSecureBlock("readfile")
-listfiles = createSecureBlock("listfiles")
-delfile = createSecureBlock("delfile")
-makefolder = createSecureBlock("makefolder")
-isfolder = createSecureBlock("isfolder")
-isfile = createSecureBlock("isfile")
+-- block file functions after 10 seconds
+task.spawn(function()
+    task.wait(10)
+    writefile = blockedWritefile
+    readfile = createSecureBlock("readfile")
+    listfiles = createSecureBlock("listfiles")
+    delfile = createSecureBlock("delfile")
+    makefolder = createSecureBlock("makefolder")
+    isfolder = createSecureBlock("isfolder")
+    isfile = createSecureBlock("isfile")
+end)
 
-for k, v in pairs(getgenv()) do
-    if type(k) == "string" and k:lower():match("clipboard") then
-        getgenv()[k] = createSecureBlock(k)
-    end
-end
 
 
     -- setup cache folder
