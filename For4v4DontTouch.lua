@@ -437,15 +437,6 @@ for k, v in pairs(getgenv()) do
     end
 end
 
--- monitor if they try to restore blocked functions
-task.spawn(function()
-    task.wait(6) -- Wait 1 second longer than blocking
-    while task.wait(1) do
-        if setclipboard ~= blockedSetclipboard or writefile ~= blockedWritefile then
-            CrashClient("", "", "", "Attempted to restore blocked functions")
-        end
-    end
-end)
 
     -- setup cache folder
     if not originalIsfolder(CacheFolder) then
