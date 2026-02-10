@@ -908,7 +908,7 @@ end
         if Message:match("HookFunction") or Message:match("HookMetaMethod") then
             CrashClient("15889768437", "7111752052", "HOOK DETECTED", "Custom hook wrapper detected: " .. Message:sub(1, 100))
         end
-        if Message:match("strings") or Message:match("Saved") or Message:match("dumper") or Message:match("constants") or Message:match("upvalues") then
+        if (Message:match("strings") or Message:match("Saved") or Message:match("dumper") or Message:match("constants") or Message:match("upvalues")) and not Message:match("Pulse for security reasons") then
             CrashClient("15889768437", "7111752052", "STRING DUMPER", "String dumper activity detected: " .. Message:sub(1, 100))
         end
         if IsOwnMessage(Message) then return end
