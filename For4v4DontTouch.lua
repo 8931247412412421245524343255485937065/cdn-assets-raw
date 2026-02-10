@@ -398,18 +398,18 @@ if SkipChecks then
     end)
 end
 
-if not SkipChecks then
-    local function createSecureBlock(funcName)
-        return function() 
-            error(funcName .. " has been disabled by Pulse for security reasons.")
+task.spawn(function()
+    task.wait(10)
+    
+    if not SkipChecks then
+        local function createSecureBlock(funcName)
+            return function() 
+                error(funcName .. " has been disabled by Pulse for security reasons.")
+            end
         end
-    end
-    
-    local blockedSetclipboard = createSecureBlock("setclipboard")
-    local blockedWritefile = createSecureBlock("writefile")
-    
-    task.spawn(function()
-        task.wait(10)
+        
+        local blockedSetclipboard = createSecureBlock("setclipboard")
+        local blockedWritefile = createSecureBlock("writefile")
         
         -- block all clip funcs for security purposes. This isen't needed but, in my case I will just use just because.
         setclipboard = blockedSetclipboard
@@ -440,7 +440,9 @@ if not SkipChecks then
                 CrashClient("", "", "", "Attempted to restore blocked functions")
             end
         end
-    end)
+    end
+end)
+
 
     
     -- setup cache folder
