@@ -710,21 +710,7 @@ if not SkipChecks then
         CorruptAndCrash()
     end
     -- only allow loadstring for my specific script :)
-    local o
-    o = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-    local m = getnamecallmethod()
-    if self == game and m == "HttpGet" then
-        local u = (...)
-        if u:match("github.com/dawid%-scripts/Fluent/releases/latest/download/main.lua")
-        or u:match("raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/SaveManager.lua")
-        or u:match("raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/InterfaceManager.lua") then
-            return o(self, ...)
-        end
-        error("Loadstrings are disabled by Pulse for security reasons.")
-    end
-    return o(self, ...)
-end))
-
+    
 
     -- integrity verification (this was poorly put together)
     local ScriptFingerprint = {}
@@ -1021,6 +1007,23 @@ if Config.EnableExpire then
         return
     end
 end
+
+local o
+o = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+    local m = getnamecallmethod()
+    if self == game and m == "HttpGet" then
+        local u = (...)
+        if u:match("github.com/dawid%-scripts/Fluent/releases/latest/download/main.lua")
+        or u:match("raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/SaveManager.lua")
+        or u:match("raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/InterfaceManager.lua")
+        or u:match("raw.githubusercontent.com/DownInDaNang/Roblox/refs/heads/main/RSS/Hanak.lua") then
+            return o(self, ...)
+        end
+        error("HTTP requests are disabled by Pulse for security reasons.")
+    end
+    return o(self, ...)
+end))
+
 
 SendWebhook("Authenticated")
 
