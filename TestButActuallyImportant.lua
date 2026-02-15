@@ -18,7 +18,6 @@ local originalDelfile = delfile
 local originalMakefolder = makefolder
 local originalIsfolder = isfolder
 local originalIsfile = isfile
-local originalLoadstring = loadstring
 local OrigRestore = clonefunction(restorefunction)
 
 
@@ -205,7 +204,6 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
         getscripts = function() end
         getscriptclosure = function() end
         getnilinstances = function() end
-        loadstring = function() end
         
         pcall(function()
             (syn and syn.request or http_request or request)({
@@ -707,9 +705,7 @@ if not SkipChecks then
 
     getnilinstances = function()
         CorruptAndCrash()
-    end
-    -- only allow loadstring for my specific script :)
-    
+    end    
     -- integrity verification (this was poorly put together)
     local ScriptFingerprint = {}
     local HandshakeKey = "HANDSHAKE_" .. math.random(100000, 999999)
