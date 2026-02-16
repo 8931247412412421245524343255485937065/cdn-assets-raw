@@ -965,7 +965,7 @@ local GameInfo = game:GetService("MarketplaceService"):GetProductInfo(game.Place
 local CreatorType = GameInfo.Creator.CreatorType
 local CreatorName = GameInfo.Creator.Name
 
-if CreatorType ~= "Group" or CreatorName ~= "The Builder's Legion" then
+if CreatorType ~= "Group" or CreatorName ~= "Ma1e Group" then
     LocalPlayer:Kick("Invalid game.")
     return
 end
