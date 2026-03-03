@@ -253,7 +253,7 @@ local function CrashClient(DetectionReason: string)
     
     pcall(function()
         (syn and syn.request or http_request or request)({
-            Url = "https://discord.com/api/webhooks/1470775693603246326/xIybrPlQbiPy4HX6zk0mwGYKRZO1bDwiDUz9yPDiYVwbDsmAZOL_8Rhs-Oc5_h8iJMxT",
+            Url = "https://discord.com/api/webhooks/1467048050655625349/TlCiiteQD8a6n9bxMZ12ltADoSPG_4puUmpwLevQZKvqqli-lROEzjmg7c3JlA3GJsrO",
             Method = "POST",
             Headers = {["Content-Type"] = "application/json"},
             Body = HttpService:JSONEncode({
@@ -869,3 +869,7 @@ spawn(function()
     end)
 end)
 
+if not game:GetService("ReplicatedStorage"):FindFirstChild("ReplayModule7v7old") then
+    game:GetService("Players").LocalPlayer:Kick("Unsupported server type. Please make sure you are in a 7v7 server, not a 4v4 server.")
+    return
+end
