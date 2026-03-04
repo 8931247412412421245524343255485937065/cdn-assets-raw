@@ -954,8 +954,10 @@ SubmitBtn.MouseButton1Click:Connect(function()
         end
     end
     
-        fadeOut:Play()
-        fadeOut.Completed:Connect(function()
+    local AuthKey = "Auth_" .. math.random(100000, 999999) .. "_" .. math.random(100000, 999999)
+
+    fadeOut:Play()
+    fadeOut.Completed:Connect(function()
         Blur:Destroy()
         ScreenGui:Destroy()
         
@@ -963,5 +965,10 @@ SubmitBtn.MouseButton1Click:Connect(function()
             game:GetService("Players").LocalPlayer:Kick("Unsupported server type. Please make sure you are in a 7v7 server, not a 4v4 server.")
             return
         end
+        
+        getgenv()[AuthKey] = true
     end)
 end)
+
+repeat task.wait() until getgenv()[AuthKey]
+
