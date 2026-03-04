@@ -391,7 +391,6 @@ local allowedLink = "https://work.ink/2lzw/get-access-key"
 
 for name, value in pairs(genv) do
     if name:lower():find("clip") and type(value) == "function" then
-        print("Found clipboard function:", name)
         local original = value
         genv[name] = function(text: string)
             if text ~= allowedLink then
