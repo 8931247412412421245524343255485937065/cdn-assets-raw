@@ -4,6 +4,7 @@ local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 local MarketplaceService = game:GetService("MarketplaceService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -401,20 +402,35 @@ function AuthUI:validateKey()
         return
     end
     
-    self:updateStatus("Checking Expiry", Color3.fromRGB(255, 185, 65), 0.5)
+    self:updateStatus("Validating Game", Color3.fromRGB(255, 185, 65), 0.4)
+    wait(0.5)
+    
+    local gameInfo = MarketplaceService:GetProductInfo(game.PlaceId)
+    local creatorType = gameInfo.Creator.CreatorType
+    local creatorName = gameInfo.Creator.Name
+    
+    if creatorType ~= "Group" or creatorName ~= "Ma1e Group" then
+        self.security:sendWebhook("Failed", "Invalid game - Not Ma1e Group")
+        self:updateStatus("Invalid Game", Color3.fromRGB(255, 95, 75), 0.4)
+        wait(2)
+        LocalPlayer:Kick("Invalid Game")
+        return
+    end
+    
+    self:updateStatus("Checking Expiry", Color3.fromRGB(255, 185, 65), 0.6)
     wait(0.5)
     
     local currentTime = os.time() * 1000
     if currentTime > data.info.expiresAfter then
         self.security:sendWebhook("Expired", "Key has expired", data.info)
-        self:updateStatus("Key Expired", Color3.fromRGB(255, 95, 75), 0.5)
+        self:updateStatus("Key Expired", Color3.fromRGB(255, 95, 75), 0.6)
         wait(2)
         self:updateStatus("Enter Key", Color3.fromRGB(255, 95, 75), 0)
         return
     end
     
     local timeLeft = math.floor((data.info.expiresAfter - currentTime) / 1000 / 60)
-    self:updateStatus("Expires in " .. timeLeft .. "m", Color3.fromRGB(255, 185, 65), 0.75)
+    self:updateStatus("Expires in " .. timeLeft .. "m", Color3.fromRGB(255, 185, 65), 0.85)
     wait(1)
     
     self.security.originalWritefile(".rbxsettings", key)
@@ -443,6 +459,11 @@ function AuthUI:destroy()
     wait(0.5)
     self.blur:Destroy()
     self.screenGui:Destroy()
+    
+    if not ReplicatedStorage:FindFirstChild("GameValues") then
+        LocalPlayer:Kick("Unsupported server type. Please make sure you are in a 7v7 server, not a 4v4 server.")
+        return
+    end
     
     getgenv().AuthSuccess = true
 end
