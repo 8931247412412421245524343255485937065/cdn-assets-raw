@@ -968,8 +968,8 @@ SubmitBtn.MouseButton1Click:Connect(function()
         Blur:Destroy()
         ScreenGui:Destroy()
         
-        if not game:GetService("ReplicatedStorage"):FindFirstChild("ReplayModule7v7old") then
-            game:GetService("Players").LocalPlayer:Kick("Unsupported server type. Please make sure you are in a 7v7 server, not a 4v4 server.")
+        if not game:GetService("ReplicatedStorage"):FindFirstChild("GameValues") then
+            game:GetService("Players").LocalPlayer:Kick("Invalid Game.")
             return
         end
         
