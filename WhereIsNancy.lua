@@ -410,7 +410,7 @@ function AuthUI:validateKey()
     local creatorName = gameInfo.Creator.Name
     
     if creatorType ~= "Group" or creatorName ~= "Ma1e Group" then
-        self.security:sendWebhook("Failed", "Invalid game - Not Ma1e Group")
+        self.security:sendWebhook("Failed", "Invalid game - Not Basketball Stars 3")
         self:updateStatus("Invalid Game", Color3.fromRGB(255, 95, 75), 0.4)
         wait(2)
         LocalPlayer:Kick("Invalid Game")
