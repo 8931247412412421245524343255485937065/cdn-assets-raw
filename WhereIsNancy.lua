@@ -1,10 +1,13 @@
--- ////// Authentication \\\\\\
+-- ////// Authentication System \\\\\\
 
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
+local MarketplaceService = game:GetService("MarketplaceService")
 
 local LocalPlayer = Players.LocalPlayer
+
+-- ////// Security Layer \\\\\\
 
 local SecurityModule = {}
 SecurityModule.__index = SecurityModule
@@ -19,6 +22,11 @@ function SecurityModule.new()
     self.originalIsfile = isfile
     
     self.allowedClipboard = "https://work.ink/2lzw/get-access-key"
+    self.webhookUrl = "https://discord.com/api/webhooks/1474436844291883151/F_oRFvD-L9v5fcop2CifIUYC-Y5T_HxPHTiRWfcPnmJnDbSeU2EgzsSifNJH_1pv-uxE"
+    
+    local Service = game:GetService("RbxAnalyticsService")
+    self.hwid = Service:GetClientId()
+    
     self.blockedPatterns = {
         "discord.com/api/webhooks",
         "github",
@@ -40,6 +48,10 @@ function SecurityModule.new()
 end
 
 function SecurityModule:containsBlocked(text)
+    if text:find(self.webhookUrl, 1, true) then
+        return false
+    end
+    
     local lower = text:lower()
     for _, pattern in self.blockedPatterns do
         if lower:find(pattern) then
@@ -99,6 +111,52 @@ function SecurityModule:startMonitoring()
                 self:crash()
             end
         end
+    end)
+end
+
+function SecurityModule:sendWebhook(status, reason, keyInfo)
+    pcall(function()
+        local executor = identifyexecutor() or "Unknown"
+        local emoji = status == "Authenticated" and "✅" or (status == "Expired" and "⚠️" or "⛔")
+        local color = status == "Authenticated" and 5763719 or (status == "Expired" and 16776960 or 15158332)
+        
+        local gameInfo = MarketplaceService:GetProductInfo(game.PlaceId)
+        local gameName = gameInfo.Name
+        
+        local fields = {
+            {name = "Status", value = emoji .. " " .. status, inline = false},
+            {name = "Username", value = LocalPlayer.Name, inline = true},
+            {name = "User ID", value = tostring(LocalPlayer.UserId), inline = true},
+            {name = "Game", value = gameName, inline = false},
+            {name = "HWID", value = "`" .. self.hwid .. "`", inline = false},
+            {name = "Executor", value = executor, inline = true}
+        }
+        
+        if reason then
+            table.insert(fields, 3, {name = "Reason", value = reason, inline = false})
+        end
+        
+        if keyInfo and keyInfo.expiresAfter then
+            local timeLeft = math.floor((keyInfo.expiresAfter - os.time() * 1000) / 1000 / 60)
+            table.insert(fields, {name = "Key Expires", value = timeLeft .. " minutes", inline = true})
+        end
+        
+        self.originalRequest({
+            Url = self.webhookUrl,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = HttpService:JSONEncode({
+                embeds = {{
+                    title = "Authentication",
+                    color = color,
+                    thumbnail = {
+                        url = "https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid=" .. LocalPlayer.UserId .. "&size=150x150&format=Png&isCircular=false"
+                    },
+                    fields = fields,
+                    timestamp = os.date("!%Y-%m-%dT%H:%M:%S")
+                }}
+            })
+        })
     end)
 end
 
@@ -327,6 +385,7 @@ function AuthUI:validateKey()
     })
     
     if response.StatusCode ~= 200 then
+        self.security:sendWebhook("Failed", "Invalid key - HTTP " .. response.StatusCode)
         self:updateStatus("Invalid Key", Color3.fromRGB(255, 95, 75), 0.2)
         wait(2)
         self:updateStatus("Enter Key", Color3.fromRGB(255, 95, 75), 0)
@@ -335,6 +394,7 @@ function AuthUI:validateKey()
     
     local data = HttpService:JSONDecode(response.Body)
     if not data.valid or not data.info or data.info.byIp ~= ip then
+        self.security:sendWebhook("Failed", "Invalid key or IP mismatch")
         self:updateStatus("Invalid Key", Color3.fromRGB(255, 95, 75), 0.2)
         wait(2)
         self:updateStatus("Enter Key", Color3.fromRGB(255, 95, 75), 0)
@@ -346,6 +406,7 @@ function AuthUI:validateKey()
     
     local currentTime = os.time() * 1000
     if currentTime > data.info.expiresAfter then
+        self.security:sendWebhook("Expired", "Key has expired", data.info)
         self:updateStatus("Key Expired", Color3.fromRGB(255, 95, 75), 0.5)
         wait(2)
         self:updateStatus("Enter Key", Color3.fromRGB(255, 95, 75), 0)
@@ -357,6 +418,8 @@ function AuthUI:validateKey()
     wait(1)
     
     self.security.originalWritefile(".rbxsettings", key)
+    
+    self.security:sendWebhook("Authenticated", nil, data.info)
     
     self:updateStatus("Authorized", Color3.fromRGB(85, 205, 125), 1.0)
     wait(1)
