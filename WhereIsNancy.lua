@@ -1,4 +1,3 @@
--- get exec name
 local ExecutorName = identifyexecutor() or "Unknown"
 local SkipChecks = ExecutorName == "Xeno" or ExecutorName == "Solara"
 
@@ -68,14 +67,12 @@ local function CrashClient(DetectionReason)
     end
 end
 
--- Check HWID spoofing
 if Method1 ~= Method2 then
     CrashClient("HWID spoofing detected")
     return
 end
 
 if not SkipChecks then
-    -- check if request function is already hooked
     if (syn and syn.request or http_request or request) and pcall(function() return isexecutorclosure end) and not isexecutorclosure((syn and syn.request or http_request or request)) then
         CrashClient("HTTP request interception detected")
     end
@@ -94,12 +91,10 @@ if not SkipChecks then
         task.wait(2)
 
         while task.wait(0.5) do
-            -- check for known spy tools
             if getgenv().EmplicsWebhookSpy or getgenv().discordwebhookdetector or getgenv().pastebindetector or getgenv().githubdetector or getgenv().anylink or getgenv().kickbypass or getgenv().StringDumper then
                 CrashClient("Unauthorized tool detected")
             end
 
-            -- verify request function hasn't been hooked
             local CurrentFunction = (syn or http).request
             if CurrentFunction ~= OriginalFunction or not isexecutorclosure(CurrentFunction) then
                 CrashClient("HTTP request interception detected")
@@ -223,3 +218,5 @@ end
 
 SendWebhook("Authenticated")
 print("Auth successful")
+
+getgenv().AuthPassed = true
