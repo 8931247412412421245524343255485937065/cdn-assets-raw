@@ -77,45 +77,61 @@ if not SkipChecks then
         CrashClient("HTTP request interception detected")
     end
 
-    task.spawn(function()
-        if not pcall(function() return isexecutorclosure end) then return end
+    local spyPatterns = {
+        "discord%.com/api/webhooks",
+        "webhook",
+        "HttpSpy",
+        "RequestLogger", 
+        "ToopSpy",
+        "HTTP SPY",
+        "REQUEST SPY",
+        "WEBHOOK SPY",
+        "Method:",
+        "URL:",
+        "Body:",
+        "Headers:",
+        "Response:",
+        "Status Code:"
+    }
+
+    local mt = getrawmetatable(game)
+    setreadonly(mt, false)
+
+    local originalIndex = mt.__index
+    mt.__index = newcclosure(function(self, key)
+        local result = originalIndex(self, key)
         
-        local RequestFunction = (syn or http).request
-        local OriginalFunction = RequestFunction
-        local OriginalRequest = request
-        local Metatable = getrawmetatable(game)
-        local wasReadonly = isreadonly(Metatable)
-        setreadonly(Metatable, false)
-        local OriginalNamecall = Metatable.__namecall
-        setreadonly(Metatable, wasReadonly)
-        
-        task.wait(2)
-
-        while task.wait(0.5) do
-            if getgenv().EmplicsWebhookSpy or getgenv().discordwebhookdetector or getgenv().pastebindetector or getgenv().githubdetector or getgenv().anylink or getgenv().kickbypass or getgenv().StringDumper then
-                CrashClient("Unauthorized tool detected")
-            end
-
-            local CurrentFunction = (syn or http).request
-            if CurrentFunction ~= OriginalFunction or not isexecutorclosure(CurrentFunction) then
-                CrashClient("HTTP request interception detected")
-            end
-            
-            if request and (request ~= OriginalRequest or not isexecutorclosure(request)) then
-                CrashClient("HTTP request interception detected")
-            end
-
-            local CurrentMetatable = getrawmetatable(game)
-            local currentNamecall = CurrentMetatable.__namecall
-            if currentNamecall ~= OriginalNamecall and not isexecutorclosure(currentNamecall) and not isnewcclosure(currentNamecall) then
-                CrashClient("HTTP request interception detected")
+        if key == "Text" and type(result) == "string" then
+            for _, pattern in pairs(spyPatterns) do
+                if result:match(pattern) then
+                    CrashClient("Spy text detected in GUI: " .. pattern)
+                end
             end
         end
+        
+        return result
     end)
+
+    local originalNewindex = mt.__newindex
+    mt.__newindex = newcclosure(function(self, key, value)
+        if key == "Text" and type(value) == "string" then
+            for _, pattern in pairs(spyPatterns) do
+                if value:match(pattern) then
+                    CrashClient("Spy text being set in GUI: " .. pattern)
+                end
+            end
+        end
+        
+        return originalNewindex(self, key, value)
+    end)
+
+    setreadonly(mt, true)
     
     game:GetService("LogService").MessageOut:Connect(function(Message)
-        if Message:match("discord%.com/api/webhooks") or Message:match("webhook") then
-            CrashClient("Unauthorized webhook activity detected")
+        for _, pattern in pairs(spyPatterns) do
+            if Message:match(pattern) then
+                CrashClient("Spy pattern in console: " .. pattern)
+            end
         end
     end)
 end
