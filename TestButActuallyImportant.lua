@@ -93,11 +93,11 @@ task.spawn(function()
     end)
 
     if Success1 or Error1 ~= "Expected ':' not '.' calling member function Kick" then
-        KrabbyPattyFormula("Anti-kick detected (Method: Kick function tampering 0x1)", "Anti-kick bypass detected.")
+        KrabbyPattyFormula("Anti-kick detected", "Anti-kick bypass detected.")
     end
 
     if Success2 or not string.match(Error2 or "", "^Kick is not a valid member of Workspace") then
-        KrabbyPattyFormula("Anti-kick detected (Method: Kick function tampering 0x2)", "Anti-kick bypass detected.")
+        KrabbyPattyFormula("Anti-kick detected", "Anti-kick bypass detected.")
     end
 
     if #Players:GetPlayers() > 1 then
@@ -109,11 +109,11 @@ task.spawn(function()
                 end)
 
                 if Success3 or Error3 ~= "Cannot kick a non-local Player from a LocalScript" then
-                    KrabbyPattyFormula("Anti-kick detected (Method: Multi-player kick tampering 0x3)", "Anti-kick bypass detected.")
+                    KrabbyPattyFormula("Anti-kick detected", "Anti-kick bypass detected.")
                 end
 
                 if Success4 or Error4 ~= "Cannot kick a non-local Player from a LocalScript" then
-                    KrabbyPattyFormula("Anti-kick detected (Method: Multi-player kick tampering 0x4)", "Anti-kick bypass detected.")
+                    KrabbyPattyFormula("Anti-kick detected", "Anti-kick bypass detected.")
                 end
                 break
             end
@@ -125,36 +125,8 @@ task.spawn(function()
     end)
 
     if Success5 or not string.match(Error5 or "", "is not a valid member of Player") then
-        KrabbyPattyFormula("Anti-kick detected (Method: Case-sensitive kick bypass)", "Anti-kick bypass detected.")
+        KrabbyPattyFormula("Anti-kick detected", "Anti-kick bypass detected.")
     end
-
-    local TestRemote = Instance.new("RemoteEvent")
-
-    local Success6, Error6 = pcall(function()
-        TestRemote:fireserver()
-    end)
-
-    local Success7, Error7 = pcall(function()
-        TestRemote.FireServer(workspace)
-    end)
-
-    local Success8, Error8 = pcall(function()
-        workspace:FireServer()
-    end)
-
-    if Success6 or not string.match(Error6 or "", "is not a valid member of RemoteEvent") then
-        KrabbyPattyFormula("Anti-kick detected (Method: FireServer hook 0x1)", "Anti-kick bypass detected.")
-    end
-
-    if Success7 or Error7 ~= "Expected ':' not '.' calling member function FireServer" then
-        KrabbyPattyFormula("Anti-kick detected (Method: FireServer hook 0x2)", "Anti-kick bypass detected.")
-    end
-
-    if Success8 or not string.match(Error8 or "", "^FireServer is not a valid member of Workspace") then
-        KrabbyPattyFormula("Anti-kick detected (Method: FireServer hook 0x3)", "Anti-kick bypass detected.")
-    end
-
-    TestRemote:Destroy()
 end)
 
 local EPSTEIN_DIDNT_KILL_HIMSELF = {}
