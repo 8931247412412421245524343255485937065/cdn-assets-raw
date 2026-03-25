@@ -89,7 +89,6 @@ if settings.EnableExpire then
     end)
     
     if not success then
-        warn("Unable to verify license")
         plr:Kick(getKickMessage("Unable to verify license", checksPassed, checksTotal))
         return
     end
@@ -100,7 +99,6 @@ if settings.EnableExpire then
     end
     
     if os.time() > data.expire then
-        warn("Script expired")
         plr:Kick(getKickMessage("Script expired", checksPassed, checksTotal))
         return
     end
