@@ -64,7 +64,7 @@ end
 if settings.EnableGameCheck then
     if not ReplicatedStorage:FindFirstChild("ReplayModule7v7old") then
         LocalPlayer:Kick("Unsupported game. Make sure you are in a 7v7 server.")
-        return
+        while true do task.wait(9e9) end
     end
     checksPassed = checksPassed + 1
 end
@@ -72,13 +72,13 @@ end
 local blacklistInfo: table? = getBlacklistInfo(hwid)
 if blacklistInfo and blacklistInfo.active then
     LocalPlayer:Kick(getKickMessage("HWID blacklisted (" .. blacklistInfo.reason .. ")", checksPassed, checksTotal))
-    return
+    while true do task.wait(9e9) end
 end
 
 if settings.EnableWhitelist and settings.EnableHWID then
     if not isWhitelisted(hwid) then
         LocalPlayer:Kick(getKickMessage("HWID not whitelisted", checksPassed, checksTotal))
-        return
+        while true do task.wait(9e9) end
     end
     checksPassed = checksPassed + 1
 end
@@ -92,17 +92,17 @@ if settings.EnableExpire then
     
     if not success then
         LocalPlayer:Kick(getKickMessage("Unable to verify license", checksPassed, checksTotal))
-        return
+        while true do task.wait(9e9) end
     end
     
     if data.Update then
         LocalPlayer:Kick("Please be patient while we update the script. We appreciate your patience!")
-        return
+        while true do task.wait(9e9) end
     end
     
     if os.time() > data.expire then
         LocalPlayer:Kick(getKickMessage("Script expired", checksPassed, checksTotal))
-        return
+        while true do task.wait(9e9) end
     end
     checksPassed = checksPassed + 1
 end
@@ -174,15 +174,15 @@ local HasKetamine: boolean = isfolder("Ketamine") or isfile("Ketamine/Settings.b
 if HasToopSpy and HasKetamine then
     SendWebhook("ToopSpy and Ketamine folders detected", false)
     LocalPlayer:Kick("ToopSpy and Ketamine detected. Delete both folders and rejoin. If you believe this was a mistake, make a ticket in LOOEJ server.")
-    return
+    while true do task.wait(9e9) end
 elseif HasToopSpy then
     SendWebhook("ToopSpy folder detected", false)
     LocalPlayer:Kick("ToopSpy detected. Delete ToopSpy folder and rejoin. If you believe this was a mistake, make a ticket in LOOEJ server.")
-    return
+    while true do task.wait(9e9) end
 elseif HasKetamine then
     SendWebhook("Ketamine folder detected", false)
     LocalPlayer:Kick("Ketamine detected. Delete Ketamine folder and rejoin. If you believe this was a mistake, make a ticket in LOOEJ server.")
-    return
+    while true do task.wait(9e9) end
 end
 
 if isfunctionhooked and debug.getinfo and hookfunction and newcclosure then
