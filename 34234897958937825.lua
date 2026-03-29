@@ -62,8 +62,7 @@ for _, enabled in pairs(settings) do
 end
 
 if settings.EnableGameCheck then
-    local replicated = ReplicatedStorage:FindFirstChild("Replicated")
-    if not replicated or not replicated:FindFirstChild("ReplayModule7v7old") then
+    if not ReplicatedStorage:FindFirstChild("ReplayModule7v7old") then
         LocalPlayer:Kick("Unsupported game. Make sure you are in a 7v7 server.")
         return
     end
